@@ -1,0 +1,41 @@
+# Survey Builder
+
+- a survey is made up of questions
+- each question has:
+    - a unique tag
+    - a function to record the answer  (answer)
+        - lets 
+    - a required flag (can this be skipped)
+        - if question shows up then the answer is required
+    - an optional condition expression (condition)
+
+- the expression is a lisp-style expression, with parenthesis for each part:
+    - and | or
+    - equals
+    - includes
+    - (answer TAG) : get the answer from question TAG
+    - (active TAG) : evaluate question TAG to see if it's active
+
+- when a question records an answer
+    - go through the questions that follow, and evaluate all optional condition to see if 
+      any of the conditions cause questions to be disabled
+    - if any question changes its state recurse into the following questions..
+        - what does this fix?
+
+## Expression Builder
+
+Examples of condition expressions:
+
+(equals (answer "Q4") "junior"))
+(includes (answer "Q3") "20"))
+(and (equal (answer "Q1") "first") (equal (answer "Q2") "second"))
+
+----
+
+| question | answer     | condition                  |
+| -------- | ---------- | -------------------------- |
+| Q1       | 12         |                            |
+| Q2       | 10         |                            |
+| Q3       | 9          | (equal (answer Q1) 12)     |
+| Q4       | 1          | (equal (answer Q2) 11) .   |
+| Q5       |            | (equal (ans))

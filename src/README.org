@@ -22,20 +22,74 @@
     - if any question changes its state recurse into the following questions..
         - what does this fix?
 
+
+## ConditionalExpression
+
 ## Expression Builder
 
 Examples of condition expressions:
 
-(equals (answer "Q4") "junior"))
-(includes (answer "Q3") "20"))
-(and (equal (answer "Q1") "first") (equal (answer "Q2") "second"))
+1. equals -- compares two string expressions
 
-----
+const exp1 = "(equals 'a' 'b')"
+new ConditionalExpression(exp1, new Builder()).evaluate() == false
 
-| question | answer     | condition                  |
-| -------- | ---------- | -------------------------- |
-| Q1       | 12         |                            |
-| Q2       | 10         |                            |
-| Q3       | 9          | (equal (answer Q1) 12)     |
-| Q4       | 1          | (equal (answer Q2) 11) .   |
-| Q5       |            | (equal (ans))
+const exp2 = "(equals 'a' 'a')"  => true
+new ConditionalExpression(exp2, new Builder()).evaluate() == true
+
+
+2. not -- negates an expression that it wraps
+const exp3 = "(not (equals 'a' 'b'))"
+new ConditionalExpression(exp3, new Builder()).evaluate() == true
+
+3. answer
+
+    it needs to look up an answer in the survey and return the value
+
+    const question: Question = {
+      tag: "q1",
+      conditionExp: exp,
+    };
+    const survey = new Survey().question(question);
+    survey.recordAnswer('q1', 'hello')
+    const exp4 = "(equals (answer 'q1') 'hello')"
+    new ConditionalExpression(exp4, survey).evaluate() == true
+    const exp5 = "(equals (answer 'q1') 'hellowse')"
+    new ConditionalExpression(exp5, survey).evaluate() == false
+
+4. includes - similar to equal, but it looks up a string in a list of strings
+
+    const exp5 = "(includes 'b' ['a', 'b'])"
+    new ConditionalExpression(exp6, new Builder()).evaluate() == false
+    (includes (answer 'Q3') '20')
+
+    const question: Question = {
+      tag: "q1",
+    };
+    const survey = new Survey().question(question);
+    survey.recordAnswer('q1', ['a', 'b'])
+    
+    const exp6 = "(includes 'b' (answer 'q1'))"
+    new ConditionalExpression(exp4, survey).evaluate() == true
+
+    const exp7 = "(includes 'c' (answer 'q1'))"
+    new ConditionalExpression(exp4, survey).evaluate() == false
+
+5. and
+    - expects two expressions
+    - evaluates them left to right
+    - stops the valuation if it detects false and returns false
+
+    const question: Question = {
+      tag: "q1",
+      conditionExp: exp,
+    };
+    const survey = new Survey().question(question);
+    survey.recordAnswer('q1', 'hello')
+    const exp8 = "(and (equals 'a' 'a') (equals 'hello' (answer 'q1')))" 
+    new ConditionalExpression(exp8, new Builder()).evaluate() == true
+
+6. or
+    - expects two expressions
+    - evaluates them left to right
+    - stops the valuation if it detects true and returns true

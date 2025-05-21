@@ -1,4 +1,4 @@
-# Survey 
+* Survey 
 
 - a survey is made up of questions
 - each question has:
@@ -23,29 +23,31 @@
         - what does this fix?
 
 
-## ConditionalExpression
-
-## Expression Builder
+** ConditionalExpression
 
 Examples of condition expressions:
 
 1. equals -- compares two string expressions
 
-const exp1 = "(equals 'a' 'b')"
-new ConditionalExpression(exp1, new Builder()).evaluate() == false
+#+BEGIN_SRC js
+    const exp1 = "(equals 'a' 'b')"
+    new ConditionalExpression(exp1, new Builder()).evaluate() == false
 
-const exp2 = "(equals 'a' 'a')"  => true
-new ConditionalExpression(exp2, new Builder()).evaluate() == true
-
+    const exp2 = "(equals 'a' 'a')"  => true
+    new ConditionalExpression(exp2, new Builder()).evaluate() == true
+#+END_SRC
 
 2. not -- negates an expression that it wraps
-const exp3 = "(not (equals 'a' 'b'))"
-new ConditionalExpression(exp3, new Builder()).evaluate() == true
+
+#+BEGIN_SRC js
+    const exp3 = "(not (equals 'a' 'b'))"
+    new ConditionalExpression(exp3, new Builder()).evaluate() == true
+#+END_SRC
 
 3. answer
-
     it needs to look up an answer in the survey and return the value
 
+#+BEGIN_SRC js
     const question: Question = {
       tag: "q1",
       conditionExp: exp,
@@ -56,9 +58,11 @@ new ConditionalExpression(exp3, new Builder()).evaluate() == true
     new ConditionalExpression(exp4, survey).evaluate() == true
     const exp5 = "(equals (answer q1) 'hellowse')"
     new ConditionalExpression(exp5, survey).evaluate() == false
+#+END_SRC
 
 4. includes - similar to equal, but it looks up a string in a list of strings
 
+#+BEGIN_SRC js
     const exp5 = "(includes 'b' ['a', 'b'])"
     new ConditionalExpression(exp6, new Builder()).evaluate() == false
     (includes (answer q3) '20')
@@ -74,12 +78,13 @@ new ConditionalExpression(exp3, new Builder()).evaluate() == true
 
     const exp7 = "(includes 'c' (answer q1))"
     new ConditionalExpression(exp4, survey).evaluate() == false
+#+END_SRC
 
 5. and
     - expects two expressions
     - evaluates them left to right
     - stops the valuation if it detects false and returns false
-
+#+BEGIN_SRC js
     const question: Question = {
       tag: "q1",
       conditionExp: exp,
@@ -88,6 +93,7 @@ new ConditionalExpression(exp3, new Builder()).evaluate() == true
     survey.recordAnswer('q1', 'hello')
     const exp8 = "(and (equals 'a' 'a') (equals 'hello' (answer q1)))" 
     new ConditionalExpression(exp8, new Builder()).evaluate() == true
+#+END_SRC
 
 6. or
     - expects two expressions

@@ -1,4 +1,4 @@
-# Survey Builder
+# Survey 
 
 - a survey is made up of questions
 - each question has:
@@ -52,16 +52,16 @@ new ConditionalExpression(exp3, new Builder()).evaluate() == true
     };
     const survey = new Survey().question(question);
     survey.recordAnswer('q1', 'hello')
-    const exp4 = "(equals (answer 'q1') 'hello')"
+    const exp4 = "(equals (answer q1) 'hello')"
     new ConditionalExpression(exp4, survey).evaluate() == true
-    const exp5 = "(equals (answer 'q1') 'hellowse')"
+    const exp5 = "(equals (answer q1) 'hellowse')"
     new ConditionalExpression(exp5, survey).evaluate() == false
 
 4. includes - similar to equal, but it looks up a string in a list of strings
 
     const exp5 = "(includes 'b' ['a', 'b'])"
     new ConditionalExpression(exp6, new Builder()).evaluate() == false
-    (includes (answer 'Q3') '20')
+    (includes (answer q3) '20')
 
     const question: Question = {
       tag: "q1",
@@ -72,7 +72,7 @@ new ConditionalExpression(exp3, new Builder()).evaluate() == true
     const exp6 = "(includes 'b' (answer 'q1'))"
     new ConditionalExpression(exp4, survey).evaluate() == true
 
-    const exp7 = "(includes 'c' (answer 'q1'))"
+    const exp7 = "(includes 'c' (answer q1))"
     new ConditionalExpression(exp4, survey).evaluate() == false
 
 5. and
@@ -86,7 +86,7 @@ new ConditionalExpression(exp3, new Builder()).evaluate() == true
     };
     const survey = new Survey().question(question);
     survey.recordAnswer('q1', 'hello')
-    const exp8 = "(and (equals 'a' 'a') (equals 'hello' (answer 'q1')))" 
+    const exp8 = "(and (equals 'a' 'a') (equals 'hello' (answer q1)))" 
     new ConditionalExpression(exp8, new Builder()).evaluate() == true
 
 6. or

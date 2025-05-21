@@ -1,0 +1,112 @@
+{
+  "children": {
+    "equalsRule": [
+      {
+        "children": {
+          "Comma": [
+            {
+              "endColumn": 13,
+              "endLine": 1,
+              "endOffset": 12,
+              "image": ",",
+              "startColumn": 13,
+              "startLine": 1,
+              "startOffset": 12,
+              "tokenType": {
+                "CATEGORIES": [Array],
+                "PATTERN": /,/,
+                "categoryMatches": [Array],
+                "categoryMatchesMap": [Object],
+                "isParent": false,
+                "name": "Comma",
+                "tokenTypeIdx": 6,
+              },
+              "tokenTypeIdx": 6,
+            },
+          ],
+          "Equals": [
+            {
+              "endColumn": 7,
+              "endLine": 1,
+              "endOffset": 6,
+              "image": "equals",
+              "startColumn": 2,
+              "startLine": 1,
+              "startOffset": 1,
+              "tokenType": {
+                "CATEGORIES": [Array],
+                "PATTERN": /equals/,
+                "categoryMatches": [Array],
+                "categoryMatchesMap": [Object],
+                "isParent": false,
+                "name": "Equals",
+                "tokenTypeIdx": 5,
+              },
+              "tokenTypeIdx": 5,
+            },
+          ],
+          "LParen": [
+            {
+              "endColumn": 1,
+              "endLine": 1,
+              "endOffset": 0,
+              "image": "(",
+              "startColumn": 1,
+              "startLine": 1,
+              "startOffset": 0,
+              "tokenType": {
+                "CATEGORIES": [Array],
+                "PATTERN": /\(/,
+                "categoryMatches": [Array],
+                "categoryMatchesMap": [Object],
+                "isParent": false,
+                "name": "LParen",
+                "tokenTypeIdx": 3,
+              },
+              "tokenTypeIdx": 3,
+            },
+          ],
+          "RParen": [
+            {
+              "endColumn": 19,
+              "endLine": 1,
+              "endOffset": 18,
+              "image": ")",
+              "startColumn": 19,
+              "startLine": 1,
+              "startOffset": 18,
+              "tokenType": {
+                "CATEGORIES": [Array],
+                "PATTERN": /\)/,
+                "categoryMatches": [Array],
+                "categoryMatchesMap": [Object],
+                "isParent": false,
+                "name": "RParen",
+                "tokenTypeIdx": 4,
+              },
+              "tokenTypeIdx": 4,
+            },
+          ],
+          "lhs": [
+            {
+              "children": {
+                "StringRule": [Array],
+              },
+              "name": "stringExpressionRule",
+            },
+          ],
+          "rhs": [
+            {
+              "children": {
+                "StringRule": [Array],
+              },
+              "name": "stringExpressionRule",
+            },
+          ],
+        },
+        "name": "equalsRule",
+      },
+    ],
+  },
+  "name": "booleanExpressionRule",
+}

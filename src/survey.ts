@@ -21,6 +21,8 @@ export class Survey {
     const lookup = this.questions.find(
       (question: QuestionState) => question.tag === questionTag
     );
+    console.log(`lookup question ${questionTag}: ${lookup}`);
+
     return lookup?.answer;
   }
 }

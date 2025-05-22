@@ -32,8 +32,8 @@ export class ExpressionParser extends CstParser {
 
   public stringExpressionRule = this.RULE("stringExpressionRule", () => {
     return this.OR([
-      { ALT: () => this.SUBRULE(this.StringRule) },
       { ALT: () => this.SUBRULE(this.answerRule) },
+      { ALT: () => this.SUBRULE(this.StringRule) },
     ]);
   });
 
@@ -57,8 +57,12 @@ export class ExpressionParser extends CstParser {
   private answerRule = this.RULE("answerRule", (): any => {
     this.CONSUME(LParen);
     this.CONSUME(Answer);
-    this.CONSUME(Identifier);
+    this.SUBRULE(this.IdentifierRule);
     this.CONSUME(RParen);
+  });
+
+  private IdentifierRule = this.RULE("IdentifierRule", (): any => {
+    this.CONSUME(Identifier);
   });
 
   // private _includes = this.RULE("includes", () => {

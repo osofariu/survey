@@ -15,65 +15,76 @@ class ConditionVisitor extends BaseConditionVisitor {
     this.validateVisitor();
   }
 
-  booleanExpressionRule(ctx: any): boolean {
-    if (ctx.children[0].Equals) {
-      return ctx.EqualsRule.lhs.image === ctx.Equals.rhs.image;
+  booleanExpressionRule(ctx: any) {
+    console.log(`\n* booleanExpressionRule: ${JSON.stringify(ctx)}`);
+    if (ctx.equalsRule) {
+      return this.visit(ctx.equalsRule);
+    } else if (ctx.notRule) {
+      return this.visit(ctx.notRule);
+    } else if (ctx.andRule) {
+      return this.visit(ctx.andRule);
     }
-    return ctx.expression;
   }
 
   stringExpressionRule(ctx: any): string {
-    console.log("** STRING");
-    console.log(JSON.stringify(ctx));
-    return ctx.expression;
+    console.log(`\n* stringExpressionRule: ${JSON.stringify(ctx)}`);
+    if (ctx.StringRule) {
+      return this.visit(ctx.StringRule);
+    } else if (ctx.answerRule) {
+      return this.visit(ctx.answerRule);
+    }
   }
 
   equalsRule(ctx: any): boolean {
-    const left = this.visit(ctx.expression[0]);
-    const right = this.visit(ctx.expression[1]);
+    console.log(`\n* equalsRule: ${JSON.stringify(ctx)}`);
+    const left = this.visit(ctx.lhs);
+    const right = this.visit(ctx.rhs);
+    console.log(`\n*** ${left} === ${right}`);
     return left === right;
   }
 
   notRule(ctx: any): boolean {
+    console.log(`\n* notRule: ${JSON.stringify(ctx)}`);
     const expr = this.visit(ctx.expression[0]);
     return !expr;
   }
 
-  answerRule(ctx: any): any {
-    const tag = ctx.String[0].image.replace(/'/g, "");
+  answerRule(ctx: any): string | string[] | undefined {
+    console.log(`\n* answerRule: ${JSON.stringify(ctx)}`);
+    const tag = this.visit(ctx.IdentifierRule);
     return this.survey.lookupAnswer(tag);
   }
 
   includesRule(ctx: any): boolean {
+    console.log(`\n* includesRule: ${JSON.stringify(ctx)}`);
     const left = this.visit(ctx.expression[0]);
     const right = this.visit(ctx.expression[1]);
     return Array.isArray(right) ? right.includes(left) : false;
   }
 
   andRule(ctx: any): boolean {
+    console.log(`\n* andRule: ${JSON.stringify(ctx)}`);
     const left = this.visit(ctx.expression[0]);
     const right = this.visit(ctx.expression[1]);
     return left && right;
   }
 
   orRule(ctx: any): boolean {
+    console.log(`\n* orRule: ${JSON.stringify(ctx)}`);
     const left = this.visit(ctx.expression[0]);
     const right = this.visit(ctx.expression[1]);
     return left || right;
   }
 
   StringRule(ctx: any): string {
-    return this.visit(ctx.expression);
+    console.log(`\n* StringRule: ${JSON.stringify(ctx)}`);
+    const result = ctx.StringValue[0].image;
+    return result.replace(/^'|'$/g, "");
   }
 
-  visit(ctx: any): any {
-    if (ctx.equals) return this.equalsRule(ctx.equals);
-    if (ctx.not) return this.notRule(ctx.not);
-    if (ctx.answer) return this.answerRule(ctx.answer);
-    if (ctx.includes) return this.includesRule(ctx.includes);
-    if (ctx.and) return this.andRule(ctx.and);
-    if (ctx.or) return this.orRule(ctx.or);
-    return ctx;
+  IdentifierRule(ctx: any): string {
+    console.log(`\n* IdentifierRule: ${JSON.stringify(ctx)}`);
+    return ctx.Identifier[0].image;
   }
 }
 export class Condition {

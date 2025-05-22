@@ -1,24 +1,24 @@
 export class QuestionState implements Question {
   tag: string;
   // required: boolean;
-  conditionExp?: string;
+  condition?: string;
 
   constructor(tag: string, conditionExp?: string) {
     this.tag = tag;
-    this.conditionExp = conditionExp;
+    this.condition = conditionExp;
   }
 
-  public answered() {
-    this.answer !== undefined;
-  }
+  // store current answer state when it's recorded
+  public answer?: string;
 
-  public answer?: string; // store current answer state
-  private active?: boolean; // store current active state
+  // this is determined dynamically when an answer is recorded,
+  // after evaluating all the conditions for the questions below
+  private active?: boolean;
 }
 
-// this is a data container; it is used to define the survey
-// questions and their dependence on other questions
+// Question describes the dependencies between questions through
+// the conditional expression
 export interface Question {
   tag: string;
-  conditionExp?: string;
+  condition?: string;
 }

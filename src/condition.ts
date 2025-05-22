@@ -15,7 +15,7 @@ class ConditionVisitor extends BaseConditionVisitor {
     this.validateVisitor();
   }
 
-  booleanExpressionRule(ctx: any) {
+  booleanExpressionRule(ctx: any): boolean {
     console.log(`\n* booleanExpressionRule: ${JSON.stringify(ctx)}`);
     if (ctx.equalsRule) {
       return this.visit(ctx.equalsRule);
@@ -23,6 +23,12 @@ class ConditionVisitor extends BaseConditionVisitor {
       return this.visit(ctx.notRule);
     } else if (ctx.andRule) {
       return this.visit(ctx.andRule);
+    } else {
+      throw new Error(
+        `Failed to match expression for booleanExpressionRule. context:\n${JSON.stringify(
+          ctx
+        )}`
+      );
     }
   }
 
@@ -32,6 +38,12 @@ class ConditionVisitor extends BaseConditionVisitor {
       return this.visit(ctx.StringRule);
     } else if (ctx.answerRule) {
       return this.visit(ctx.answerRule);
+    } else {
+      throw new Error(
+        `Failed to match expression for stringExpressionRule. context:\n${JSON.stringify(
+          ctx
+        )}`
+      );
     }
   }
 
@@ -40,6 +52,7 @@ class ConditionVisitor extends BaseConditionVisitor {
     const left = this.visit(ctx.lhs);
     const right = this.visit(ctx.rhs);
     console.log(`\n*** ${left} === ${right}`);
+    // do we need to validate types better?
     return left === right;
   }
 
@@ -49,7 +62,7 @@ class ConditionVisitor extends BaseConditionVisitor {
     return !expr;
   }
 
-  answerRule(ctx: any): string | string[] | undefined {
+  answerRule(ctx: any): string | undefined {
     console.log(`\n* answerRule: ${JSON.stringify(ctx)}`);
     const tag = this.visit(ctx.IdentifierRule);
     return this.survey.lookupAnswer(tag);

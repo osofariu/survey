@@ -3,7 +3,7 @@ import { Question, QuestionState } from "./question";
 export class Survey {
   questions: QuestionState[] = [];
   question(q: Question): Survey {
-    this.questions.push(new QuestionState(q.tag, q.conditionExp));
+    this.questions.push(new QuestionState(q.tag, q.condition));
     return this;
   }
   traverse(): QuestionState[] {
@@ -17,7 +17,7 @@ export class Survey {
       findQuestion.answer = answer;
     }
   }
-  lookupAnswer(questionTag: string): string | string[] | undefined {
+  lookupAnswer(questionTag: string): string | undefined {
     const lookup = this.questions.find(
       (question: QuestionState) => question.tag === questionTag
     );

@@ -37,7 +37,6 @@ export class ExpressionParser extends CstParser {
     ]);
   });
 
-  // expects expressions that result in a string
   private equalsRule = this.RULE("equalsRule", () => {
     this.CONSUME(LParen);
     this.CONSUME(Equals);
@@ -65,12 +64,13 @@ export class ExpressionParser extends CstParser {
     this.CONSUME(Identifier);
   });
 
+  // TODO: this needs more work - we need to introduce an array type
   // private _includes = this.RULE("includes", () => {
   //   this.CONSUME(LParen);
   //   this.CONSUME(Includes);
-  //   this.SUBRULE1(this.stringExpression);
+  //   this.SUBRULE1(this.stringExpressionRule);
   //   this.CONSUME(WhiteSpace);
-  //   this.SUBRULE2(this.stringExpression);
+  //   this.SUBRULE2(this.stringExpressionRule);
   //   this.CONSUME(RParen);
   // });
 

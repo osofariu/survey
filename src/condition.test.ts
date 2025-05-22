@@ -55,5 +55,3 @@ describe("Conditional Expression", () => {
     ).toBe(true);
   });
 });
-
-//

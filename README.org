@@ -2,32 +2,29 @@
 
 ** Brief Description
 
-- a Survey is made up of Questions. The Survey tracks answers recorded for its questions, and determines
-which questions are active based on the optional condition associated with question.
+- A Survey is made up of Questions. The Survey tracks answers recorded for its questions, and determines which questions are active based on the optional condition associated with question.
 
-- each Question has:
+- Each Question has:
     - a unique /tag/ to idendify that Question
     - an optional /condition/ that at runtime can be used to determine if
     the question is active or not.
 
-- the /condition/ is a string, matching a lisp-style expression. It supports the following operations:
+- The /condition/ is a string, matching a lisp-style expression. It supports the following operations:
     - (and boolean-exp-1 boolean-exp-2)
     - (or boolean-exp-1 boolean-exp-2)
     - (equals string-exp-1 string-exp-2)
     - (includes array-exp string-exp)
     - (answer Identifier)
 
-- when the Survey records an answer for a Question it updates the state for the questions that follow it:
-      if a question changes its state from what was previously recorded, the Survey re-evaluates the following questions to see if their state needs to change
+- When the Survey records an answer for a Question it updates the state for the questions that follow it:
+    - if a question changes its state from what was previously recorded, the Survey re-evaluates the following questions to see if their state needs to change
     - essentially this means they Survey keeps recursing over the remaining questions as needed to keep the state of each question consistent with the optional condition.
 
 ** Conditions
 
-Conditions can be nested indefinitely as long as they conform to the grammar
-for this conditonal expression.
+Conditions can be nested indefinitely as long as they conform to the grammar for this conditonal expression.
 
-I should define the grammar more formally, but the few examples below will help
-illustrate what you can do with conditions.
+I should define the grammar more formally, but the few examples below will help illustrate what you can do with conditions.
 
 *** equals -- compares two string expressions
 

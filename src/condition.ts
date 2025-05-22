@@ -45,7 +45,7 @@ class ConditionVisitor extends BaseConditionVisitor {
 
   notRule(ctx: any): boolean {
     console.log(`\n* notRule: ${JSON.stringify(ctx)}`);
-    const expr = this.visit(ctx.expression[0]);
+    const expr = this.visit(ctx.booleanExpressionRule);
     return !expr;
   }
 
@@ -64,8 +64,8 @@ class ConditionVisitor extends BaseConditionVisitor {
 
   andRule(ctx: any): boolean {
     console.log(`\n* andRule: ${JSON.stringify(ctx)}`);
-    const left = this.visit(ctx.expression[0]);
-    const right = this.visit(ctx.expression[1]);
+    const left = this.visit(ctx.lhs);
+    const right = this.visit(ctx.rhs);
     return left && right;
   }
 

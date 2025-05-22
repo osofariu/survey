@@ -77,9 +77,9 @@ export class ExpressionParser extends CstParser {
   private andRule = this.RULE("andRule", () => {
     this.CONSUME(LParen);
     this.CONSUME(And);
-    this.SUBRULE1(this.booleanExpressionRule);
-    this.CONSUME(WhiteSpace);
-    this.SUBRULE2(this.booleanExpressionRule);
+    this.SUBRULE1(this.booleanExpressionRule, { LABEL: "lhs" });
+    this.CONSUME(Comma);
+    this.SUBRULE2(this.booleanExpressionRule, { LABEL: "rhs" });
     this.CONSUME(RParen);
   });
 

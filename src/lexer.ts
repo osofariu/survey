@@ -3,7 +3,6 @@ import { createToken, Lexer } from "chevrotain";
 export const LParen = createToken({ name: "LParen", pattern: /\(/ });
 export const RParen = createToken({ name: "RParen", pattern: /\)/ });
 export const Equals = createToken({ name: "Equals", pattern: /equals/ });
-export const Comma = createToken({ name: "Comma", pattern: /,/ });
 export const Not = createToken({ name: "Not", pattern: /not/ });
 export const Answer = createToken({ name: "Answer", pattern: /answer/ });
 export const Includes = createToken({ name: "Includes", pattern: /includes/ });
@@ -19,7 +18,7 @@ export const Identifier = createToken({
 });
 export const WhiteSpace = createToken({
   name: "WhiteSpace",
-  pattern: /[ \t\n\r]+/,
+  pattern: /\s+/,
   group: Lexer.SKIPPED,
 });
 
@@ -36,7 +35,6 @@ export const allTokens = [
   StringValue,
   Identifier,
   WhiteSpace,
-  Comma,
 ];
 
 export const lexer = new Lexer(allTokens);

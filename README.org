@@ -1,24 +1,27 @@
 * Survey 
 
-- a survey is made up of questions
-- each question has:
-    - a unique tag
-    - a function to record the answer
-    - an optional condition expression
+** Brief Description
 
-- the expression is a lisp-style expression:
-    - and | or
-    - equals
-    - includes
-    - (answer TAG) : get the answer from question TAG
-    - (active TAG) : evaluate question TAG to see if it's active
+- a Survey is made up of Questions. The Survey tracks answers recorded for its questions, and determines
+which questions are active based on the optional condition associated with question.
 
-- when a question records an answer
-    - go through the questions that follow, and evaluate all optional condition to see if 
-      any of the conditions cause questions to be disabled
-    - if any question changes its state recurse into the following questions..
+- each Question has:
+    - a unique /tag/ to idendify that Question
+    - an optional /condition/ that at runtime can be used to determine if
+    the question is active or not.
 
-** ConditionalExpression
+- the /condition/ is a string, matching a lisp-style expression. It supports the following operations:
+    - (and boolean-exp-1 boolean-exp-2)
+    - (or boolean-exp-1 boolean-exp-2)
+    - (equals string-exp-1 string-exp-2)
+    - (includes array-exp string-exp)
+    - (answer Identifier)
+
+- when the Survey records an answer for a Question it updates the state for the questions that follow it:
+      if a question changes its state from what was previously recorded, the Survey re-evaluates the following questions to see if their state needs to change
+    - essentially this means they Survey keeps recursing over the remaining questions as needed to keep the state of each question consistent with the optional condition.
+
+** Conditions
 
 Conditions can be nested indefinitely as long as they conform to the grammar
 for this conditonal expression.
@@ -29,17 +32,17 @@ illustrate what you can do with conditions.
 *** equals -- compares two string expressions
 
 #+BEGIN_SRC js
-    const exp1 = "(equals 'a', 'b')"
+    const exp1 = "(equals 'a' 'b')"
     new ConditionalExpression(new Survey()).evaluate(exp1) == false
 
-    const exp2 = "(equals 'a', 'a')"  => true
+    const exp2 = "(equals 'a' 'a')"  => true
     new ConditionalExpression(new Survey()).evaluate(exp2) == true
 #+END_SRC
 
 *** not -- negates an expression that it wraps
 
 #+BEGIN_SRC js
-    const exp = "(not (equals 'a', 'b'))"
+    const exp = "(not (equals 'a' 'b'))"
     new ConditionalExpression(new Survey()).evaluate(exp) == true
 #+END_SRC
 
@@ -52,10 +55,10 @@ illustrate what you can do with conditions.
       conditionExp: exp,
     };
     const survey = new Survey().question(question);
-    survey.recordAnswer('q1', 'hello')
-    const exp1 = "(equals (answer q1), 'hello')"
+    survey.recordAnswer('q1' 'hello')
+    const exp1 = "(equals (answer q1) 'hello')"
     new ConditionalExpression(survey).evaluate(exp1) == true
-    const exp2 = "(equals (answer q1), 'hellowse')"
+    const exp2 = "(equals (answer q1) 'hellowse')"
     new ConditionalExpression(survey).evaluate(exp2) == false
 #+END_SRC
 
@@ -63,7 +66,7 @@ illustrate what you can do with conditions.
 
 #+BEGIN_SRC js
     // simple example:
-    const exp1 = "(includes ['a', 'b'], 'b')"
+    const exp1 = "(includes ['a', 'b'] 'b')"
     new ConditionalExpression(new Survey()).evaluate(exp1) == true
 
     // with answer:
@@ -73,7 +76,7 @@ illustrate what you can do with conditions.
     const survey = new Survey().question(question);
     survey.recordAnswer('q1', ['a', 'b'])
 
-    const exp2 = "(includes (answer q1), 'c')"
+    const exp2 = "(includes (answer q1) 'c')"
     new ConditionalExpression(survey).evaluate(exp2) == false
 #+END_SRC
 
@@ -94,7 +97,7 @@ illustrate what you can do with conditions.
     const survey = new Survey().question(question1).question(question2);
     survey.recordAnswer('q1', 'hello')
     survey.recordAnswer('q2', 'there') 
-    const exp = "(not (and (equals (answer q1), "hello"), (equals 'there', (answer q2))))" 
+    const exp = "(not (and (equals (answer q1) "hello") (equals 'there' (answer q2))))" 
     new ConditionalExpression(survey).evaluate(exp) == false
 #+END_SRC
 

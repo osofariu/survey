@@ -1,6 +1,5 @@
 export class QuestionState implements Question {
   tag: string;
-  // required: boolean;
   condition?: string;
 
   constructor(tag: string, conditionExp?: string) {

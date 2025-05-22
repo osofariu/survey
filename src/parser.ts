@@ -41,7 +41,6 @@ export class ExpressionParser extends CstParser {
     this.CONSUME(LParen);
     this.CONSUME(Equals);
     this.SUBRULE1(this.stringExpressionRule, { LABEL: "lhs" });
-    this.CONSUME(Comma);
     this.SUBRULE2(this.stringExpressionRule, { LABEL: "rhs" });
     this.CONSUME(RParen);
   });
@@ -78,7 +77,6 @@ export class ExpressionParser extends CstParser {
     this.CONSUME(LParen);
     this.CONSUME(And);
     this.SUBRULE1(this.booleanExpressionRule, { LABEL: "lhs" });
-    this.CONSUME(Comma);
     this.SUBRULE2(this.booleanExpressionRule, { LABEL: "rhs" });
     this.CONSUME(RParen);
   });

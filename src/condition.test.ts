@@ -6,16 +6,16 @@ import { Condition } from "./condition";
 describe("Conditional Expression", () => {
   it("equals - false example", () => {
     const condition = new Condition(new Survey());
-    expect(condition.evaluate("(equals 'hi', 'ho')")).toBe(false);
+    expect(condition.evaluate("(equals 'hi' 'ho')")).toBe(false);
   });
   it("equals - true example", () => {
     const condition = new Condition(new Survey());
-    expect(condition.evaluate("(equals 'hi', 'hi')")).toBe(true);
+    expect(condition.evaluate("(equals 'hi' 'hi')")).toBe(true);
   });
 
   it("not equals - true example", () => {
     const condition = new Condition(new Survey());
-    expect(condition.evaluate("(not (equals 'hi', 'hi'))")).toBe(false);
+    expect(condition.evaluate("(not (equals 'hi' 'hi'))")).toBe(false);
   });
   it("question lookup - answer is on right", () => {
     const q1: Question = {
@@ -24,7 +24,7 @@ describe("Conditional Expression", () => {
     const survey = new Survey().question(q1);
     survey.recordAnswer("q1", "hello");
     const condition = new Condition(survey);
-    expect(condition.evaluate("(equals 'hello', (answer q1))")).toBe(true);
+    expect(condition.evaluate("(equals 'hello' (answer q1))")).toBe(true);
   });
 
   it("question lookup - answer is on left", () => {
@@ -34,7 +34,7 @@ describe("Conditional Expression", () => {
     const survey = new Survey().question(q1);
     survey.recordAnswer("q1", "hellow");
     const condition = new Condition(survey);
-    expect(condition.evaluate("(equals (answer q1), 'hello')")).toBe(false);
+    expect(condition.evaluate("(equals (answer q1) 'hello')")).toBe(false);
   });
 
   it("and example", () => {
@@ -50,7 +50,7 @@ describe("Conditional Expression", () => {
     const condition = new Condition(survey);
     expect(
       condition.evaluate(
-        "(and (equals (answer q1),'apple'), (equals (answer q2),'pie'))"
+        "(and (equals (answer q1) 'apple') (equals (answer q2) 'pie'))"
       )
     ).toBe(true);
   });

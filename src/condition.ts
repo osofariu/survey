@@ -72,7 +72,7 @@ class ConditionVisitor extends BaseConditionVisitor {
     console.log(`\n* includesRule: ${JSON.stringify(ctx)}`);
     const left = this.visit(ctx.expression[0]);
     const right = this.visit(ctx.expression[1]);
-    return Array.isArray(right) ? right.includes(left) : false;
+    return Array.isArray(left) ? left.includes(right) : false;
   }
 
   andRule(ctx: any): boolean {

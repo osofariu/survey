@@ -3,13 +3,10 @@
 - a survey is made up of questions
 - each question has:
     - a unique tag
-    - a function to record the answer  (answer)
-        - lets 
-    - a required flag (can this be skipped)
-        - if question shows up then the answer is required
-    - an optional condition expression (condition)
+    - a function to record the answer
+    - an optional condition expression
 
-- the expression is a lisp-style expression, with parenthesis for each part:
+- the expression is a lisp-style expression:
     - and | or
     - equals
     - includes
@@ -20,31 +17,33 @@
     - go through the questions that follow, and evaluate all optional condition to see if 
       any of the conditions cause questions to be disabled
     - if any question changes its state recurse into the following questions..
-        - what does this fix?
-
 
 ** ConditionalExpression
 
-Examples of condition expressions:
+Conditions can be nested indefinitely as long as they conform to the grammar
+for this conditonal expression.
 
-1. equals -- compares two string expressions
+I should define the grammar more formally, but the few examples below will help
+illustrate what you can do with conditions.
 
-#+BEGIN_SRC js
-    const exp1 = "(equals 'a' 'b')"
-    new ConditionalExpression(exp1, new Builder()).evaluate() == false
-
-    const exp2 = "(equals 'a' 'a')"  => true
-    new ConditionalExpression(exp2, new Builder()).evaluate() == true
-#+END_SRC
-
-2. not -- negates an expression that it wraps
+*** equals -- compares two string expressions
 
 #+BEGIN_SRC js
-    const exp3 = "(not (equals 'a' 'b'))"
-    new ConditionalExpression(exp3, new Builder()).evaluate() == true
+    const exp1 = "(equals 'a', 'b')"
+    new ConditionalExpression(new Survey()).evaluate(exp1) == false
+
+    const exp2 = "(equals 'a', 'a')"  => true
+    new ConditionalExpression(new Survey()).evaluate(exp2) == true
 #+END_SRC
 
-3. answer
+*** not -- negates an expression that it wraps
+
+#+BEGIN_SRC js
+    const exp = "(not (equals 'a', 'b'))"
+    new ConditionalExpression(new Survey()).evaluate(exp) == true
+#+END_SRC
+
+*** answer
     it needs to look up an answer in the survey and return the value
 
 #+BEGIN_SRC js
@@ -54,48 +53,52 @@ Examples of condition expressions:
     };
     const survey = new Survey().question(question);
     survey.recordAnswer('q1', 'hello')
-    const exp4 = "(equals (answer q1) 'hello')"
-    new ConditionalExpression(exp4, survey).evaluate() == true
-    const exp5 = "(equals (answer q1) 'hellowse')"
-    new ConditionalExpression(exp5, survey).evaluate() == false
+    const exp1 = "(equals (answer q1), 'hello')"
+    new ConditionalExpression(survey).evaluate(exp1) == true
+    const exp2 = "(equals (answer q1), 'hellowse')"
+    new ConditionalExpression(survey).evaluate(exp2) == false
 #+END_SRC
 
-4. includes - similar to equal, but it looks up a string in a list of strings
+*** includes - similar to equal, but it looks up a string in a list of strings
 
 #+BEGIN_SRC js
-    const exp5 = "(includes 'b' ['a', 'b'])"
-    new ConditionalExpression(exp6, new Builder()).evaluate() == false
-    (includes (answer q3) '20')
+    // simple example:
+    const exp1 = "(includes ['a', 'b'], 'b')"
+    new ConditionalExpression(new Survey()).evaluate(exp1) == true
 
+    // with answer:
     const question: Question = {
       tag: "q1",
     };
     const survey = new Survey().question(question);
     survey.recordAnswer('q1', ['a', 'b'])
-    
-    const exp6 = "(includes 'b' (answer 'q1'))"
-    new ConditionalExpression(exp4, survey).evaluate() == true
 
-    const exp7 = "(includes 'c' (answer q1))"
-    new ConditionalExpression(exp4, survey).evaluate() == false
+    const exp2 = "(includes (answer q1), 'c')"
+    new ConditionalExpression(survey).evaluate(exp2) == false
 #+END_SRC
 
-5. and
+*** and
     - expects two expressions
     - evaluates them left to right
     - stops the valuation if it detects false and returns false
+    - this example pulls in multiple expressions to make it more interesting
 #+BEGIN_SRC js
-    const question: Question = {
+    const question1: Question = {
       tag: "q1",
       conditionExp: exp,
     };
-    const survey = new Survey().question(question);
+    const question2: Question = {
+      tag: "q2",
+      conditionExp: exp,
+    };
+    const survey = new Survey().question(question1).question(question2);
     survey.recordAnswer('q1', 'hello')
-    const exp8 = "(and (equals 'a' 'a') (equals 'hello' (answer q1)))" 
-    new ConditionalExpression(exp8, new Builder()).evaluate() == true
+    survey.recordAnswer('q2', 'there') 
+    const exp = "(not (and (equals (answer q1), "hello"), (equals 'there', (answer q2))))" 
+    new ConditionalExpression(survey).evaluate(exp) == false
 #+END_SRC
 
-6. or
+*** or
     - expects two expressions
     - evaluates them left to right
     - stops the valuation if it detects true and returns true

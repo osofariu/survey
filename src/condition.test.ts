@@ -118,7 +118,7 @@ describe("Conditional Expression", () => {
       const survey = new Survey().question(q);
       survey.recordAnswer("q", ["apple", "pear", "plum"]);
       expect(
-        new Condition(survey).evaluate("(includes (answer q) 'apple')")
+        new Condition(survey).evaluate("(includes (arrayAnswer q) 'apple')")
       ).toBe(true);
     });
 
@@ -129,7 +129,7 @@ describe("Conditional Expression", () => {
       const survey = new Survey().question(q);
       survey.recordAnswer("q", ["apple", "pear", "plum"]);
       expect(
-        new Condition(survey).evaluate("(includes (answer q) 'apples')")
+        new Condition(survey).evaluate("(includes (arrayAnswer q) 'apples')")
       ).toBe(false);
     });
     it("includes with literal array", () => {

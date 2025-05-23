@@ -5,6 +5,10 @@ export const RParen = createToken({ name: "RParen", pattern: /\)/ });
 export const Equals = createToken({ name: "Equals", pattern: /equals/ });
 export const Not = createToken({ name: "Not", pattern: /not/ });
 export const Answer = createToken({ name: "Answer", pattern: /answer/ });
+export const ArrayAnswer = createToken({
+  name: "ArrayAnswer",
+  pattern: /arrayAnswer/,
+});
 export const Includes = createToken({ name: "Includes", pattern: /includes/ });
 export const And = createToken({ name: "And", pattern: /and/ });
 export const Or = createToken({ name: "Or", pattern: /or/ });
@@ -33,6 +37,7 @@ export const allTokens = [
   Equals,
   Not,
   Answer,
+  ArrayAnswer,
   Includes,
   And,
   Or,

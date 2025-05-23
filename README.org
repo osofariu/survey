@@ -61,6 +61,8 @@ I should define the grammar more formally, but the few examples below will help 
 
 *** includes - similar to equal, but it looks up a string in a list of strings
 
+To help out parsing the gammar I used a different lookup keyword: arrayAnswer instead of answer.  A bit less elegant, but not terrible.
+
 #+BEGIN_SRC js
     // simple example:
     const exp1 = "(includes ['a', 'b'] 'b')"
@@ -73,7 +75,7 @@ I should define the grammar more formally, but the few examples below will help 
     const survey = new Survey().question(question);
     survey.recordAnswer('q1', ['a', 'b'])
 
-    const exp2 = "(includes (answer q1) 'c')"
+    const exp2 = "(includes (arrayAnswer q1) 'c')"
     new Condition(survey).evaluate(exp2) == false
 #+END_SRC
 

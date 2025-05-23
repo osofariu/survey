@@ -10,7 +10,9 @@ const BaseConditionVisitor = parserInstance.getBaseCstVisitorConstructor();
 type ValueType = string | string[] | number;
 type BooleanResult = boolean;
 type StringResult = string;
+type NumericResult = number;
 type StringArrayResult = string[];
+type NumericArrayResult = number[];
 
 class ConditionVisitor extends BaseConditionVisitor {
   private survey: Survey;
@@ -68,18 +70,18 @@ class ConditionVisitor extends BaseConditionVisitor {
     throw new Error(`Invalid value expression: ${JSON.stringify(ctx)}`);
   }
 
-  stringExpressionRule(ctx: any): StringResult {
-    if (ctx.StringRule) {
-      return this.visit(ctx.StringRule);
-    } else if (ctx.stringAnswerRule) {
-      return this.visit(ctx.stringAnswerRule);
+  elementExpressionRule(ctx: any): StringResult | NumericResult {
+    if (ctx.valueRule) {
+      return this.visit(ctx.valueRule);
+    } else if (ctx.valueAnswerRule) {
+      return this.visit(ctx.valueAnswerRule);
     }
-    throw new Error(`Invalid string expression: ${JSON.stringify(ctx)}`);
+    throw new Error(`Invalid element expression: ${JSON.stringify(ctx)}`);
   }
 
-  stringArrayExpressionRule(ctx: any): StringArrayResult {
-    if (ctx.StringArrayRule) {
-      return this.visit(ctx.StringArrayRule);
+  arrayExpressionRule(ctx: any): StringArrayResult | NumericArrayResult {
+    if (ctx.ValueArrayRule) {
+      return this.visit(ctx.ValueArrayRule);
     } else if (ctx.arrayAnswerRule) {
       return this.visit(ctx.arrayAnswerRule);
     }
@@ -117,29 +119,40 @@ class ConditionVisitor extends BaseConditionVisitor {
     return this.visit(ctx.lhs) || this.visit(ctx.rhs);
   }
 
+  valueRule(ctx: any): NumericResult | StringResult {
+    if (ctx.StringRule) return this.visit(ctx.StringRule);
+    if (ctx.NumericResult) return this.visit(ctx.NumericRule);
+    throw new Error(`Unexpected valueRule: ${JSON.stringify(ctx)}`);
+  }
   // Value rules
   StringRule(ctx: any): StringResult {
     const result = ctx.StringValue[0].image;
     return result.replace(/^'|'$/g, "");
   }
 
-  StringArrayRule(ctx: any): StringArrayResult {
-    const arrayExp = ctx.StringArrayValue[0].image;
-    const parsableArrayExp = arrayExp.replaceAll("'", '"');
+  NumericRule(ctx: any): StringResult {
+    return ctx.StringValue[0].image;
+  }
+
+  ValueArrayRule(ctx: any): StringArrayResult {
+    let arrayToParse = ctx.StringArrayValue[0].image;
+    if (ctx.StringArrayValue) {
+      arrayToParse = arrayToParse.replaceAll("'", '"');
+    }
     try {
-      return JSON.parse(parsableArrayExp);
+      return JSON.parse(arrayToParse);
     } catch (e) {
-      throw new Error(`Failed to parse array expression: ${arrayExp}`);
+      throw new Error(`Failed to parse array expression: ${arrayToParse}`);
     }
   }
 
   // Answer rules with distinct types
-  stringAnswerRule(ctx: any): StringResult {
+  valueAnswerRule(ctx: any): StringResult | NumericResult {
     const tag = this.visit(ctx.IdentifierRule);
     const answer = this.survey.lookupAnswer(tag);
-    if (typeof answer !== "string") {
+    if (typeof answer !== "string" && typeof answer !== "number") {
       throw new Error(
-        `Expected string answer for tag ${tag}, got ${typeof answer}`
+        `Expected string or number type answer for tag ${tag}, got ${typeof answer}`
       );
     }
     return answer;

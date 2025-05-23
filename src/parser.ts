@@ -14,11 +14,15 @@ import {
   StringValue,
   WhiteSpace,
   StringArrayValue,
+  NumericValue,
+  NumericArrayValue,
 } from "./lexer";
+import { config } from "process";
 
 export class ExpressionParser extends CstParser {
   constructor() {
-    super(allTokens);
+    super(allTokens, { maxLookahead: 2 });
+
     this.performSelfAnalysis();
   }
 
@@ -53,44 +57,34 @@ export class ExpressionParser extends CstParser {
   });
 
   // Value expressions
-  private valueExpressionRule = this.RULE("valueExpressionRule", () => {
+  private elementExpressionRule = this.RULE("elementExpressionRule", () => {
     return this.OR([
-      { ALT: () => this.SUBRULE(this.stringExpressionRule) },
-      { ALT: () => this.SUBRULE(this.stringArrayExpressionRule) },
+      { ALT: () => this.SUBRULE(this.valueRule) },
+      { ALT: () => this.SUBRULE(this.valueAnswerRule) },
     ]);
   });
 
-  private stringExpressionRule = this.RULE("stringExpressionRule", () => {
+  private arrayExpressionRule = this.RULE("arrayExpressionRule", () => {
     return this.OR([
-      { ALT: () => this.SUBRULE(this.StringRule) },
-      { ALT: () => this.SUBRULE(this.stringAnswerRule) },
+      { ALT: () => this.SUBRULE(this.ValueArrayRule) },
+      { ALT: () => this.SUBRULE(this.arrayAnswerRule) },
     ]);
   });
-
-  private stringArrayExpressionRule = this.RULE(
-    "stringArrayExpressionRule",
-    () => {
-      return this.OR([
-        { ALT: () => this.SUBRULE(this.StringArrayRule) },
-        { ALT: () => this.SUBRULE(this.arrayAnswerRule) },
-      ]);
-    }
-  );
 
   // Comparison rules
   private equalsRule = this.RULE("equalsRule", () => {
     this.CONSUME(LParen);
     this.CONSUME(Equals);
-    this.SUBRULE1(this.valueExpressionRule, { LABEL: "lhs" });
-    this.SUBRULE2(this.valueExpressionRule, { LABEL: "rhs" });
+    this.SUBRULE1(this.elementExpressionRule, { LABEL: "lhs" });
+    this.SUBRULE2(this.elementExpressionRule, { LABEL: "rhs" });
     this.CONSUME(RParen);
   });
 
   private includesRule = this.RULE("includesRule", () => {
     this.CONSUME(LParen);
     this.CONSUME(Includes);
-    this.SUBRULE1(this.stringArrayExpressionRule, { LABEL: "left" });
-    this.SUBRULE2(this.stringExpressionRule, { LABEL: "right" });
+    this.SUBRULE1(this.arrayExpressionRule, { LABEL: "left" });
+    this.SUBRULE2(this.elementExpressionRule, { LABEL: "right" });
     this.CONSUME(RParen);
   });
 
@@ -123,12 +117,24 @@ export class ExpressionParser extends CstParser {
     this.CONSUME(StringValue);
   });
 
-  private StringArrayRule = this.RULE("StringArrayRule", () => {
-    this.CONSUME(StringArrayValue);
+  private NumericRule = this.RULE("NumericRule", () => {
+    this.CONSUME(NumericValue);
+  });
+
+  private valueRule = this.RULE("valueRule", () => {
+    return this.OR([
+      { ALT: () => this.SUBRULE(this.StringRule) },
+      { ALT: () => this.SUBRULE(this.NumericRule) },
+    ]);
+  });
+
+  private ValueArrayRule = this.RULE("ValueArrayRule", () => {
+    return this.OR([{ ALT: () => this.CONSUME(StringArrayValue) }]);
+    return this.OR([{ ALT: () => this.CONSUME(NumericArrayValue) }]);
   });
 
   // Answer rules with distinct keywords
-  private stringAnswerRule = this.RULE("stringAnswerRule", () => {
+  private valueAnswerRule = this.RULE("valueAnswerRule", () => {
     this.CONSUME(LParen);
     this.CONSUME(Answer);
     this.SUBRULE(this.IdentifierRule);

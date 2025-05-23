@@ -30,17 +30,17 @@ I should define the grammar more formally, but the few examples below will help 
 
 #+BEGIN_SRC js
     const exp1 = "(equals 'a' 'b')"
-    new ConditionalExpression(new Survey()).evaluate(exp1) == false
+    new Condition(new Survey()).evaluate(exp1) == false
 
     const exp2 = "(equals 'a' 'a')"  => true
-    new ConditionalExpression(new Survey()).evaluate(exp2) == true
+    new Condition(new Survey()).evaluate(exp2) == true
 #+END_SRC
 
 *** not -- negates an expression that it wraps
 
 #+BEGIN_SRC js
     const exp = "(not (equals 'a' 'b'))"
-    new ConditionalExpression(new Survey()).evaluate(exp) == true
+    new Condition(new Survey()).evaluate(exp) == true
 #+END_SRC
 
 *** answer
@@ -54,9 +54,9 @@ I should define the grammar more formally, but the few examples below will help 
     const survey = new Survey().question(question);
     survey.recordAnswer('q1' 'hello')
     const exp1 = "(equals (answer q1) 'hello')"
-    new ConditionalExpression(survey).evaluate(exp1) == true
+    new Condition(survey).evaluate(exp1) == true
     const exp2 = "(equals (answer q1) 'hellowse')"
-    new ConditionalExpression(survey).evaluate(exp2) == false
+    new Condition(survey).evaluate(exp2) == false
 #+END_SRC
 
 *** includes - similar to equal, but it looks up a string in a list of strings
@@ -64,7 +64,7 @@ I should define the grammar more formally, but the few examples below will help 
 #+BEGIN_SRC js
     // simple example:
     const exp1 = "(includes ['a', 'b'] 'b')"
-    new ConditionalExpression(new Survey()).evaluate(exp1) == true
+    new Condition(new Survey()).evaluate(exp1) == true
 
     // with answer:
     const question: Question = {
@@ -74,7 +74,7 @@ I should define the grammar more formally, but the few examples below will help 
     survey.recordAnswer('q1', ['a', 'b'])
 
     const exp2 = "(includes (answer q1) 'c')"
-    new ConditionalExpression(survey).evaluate(exp2) == false
+    new Condition(survey).evaluate(exp2) == false
 #+END_SRC
 
 *** and
@@ -95,7 +95,7 @@ I should define the grammar more formally, but the few examples below will help 
     survey.recordAnswer('q1', 'hello')
     survey.recordAnswer('q2', 'there') 
     const exp = "(not (and (equals (answer q1) "hello") (equals 'there' (answer q2))))" 
-    new ConditionalExpression(survey).evaluate(exp) == false
+    new Condition(survey).evaluate(exp) == false
 #+END_SRC
 
 *** or

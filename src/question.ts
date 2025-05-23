@@ -8,7 +8,7 @@ export class QuestionState implements Question {
   }
 
   // store current answer state when it's recorded
-  public answer?: string;
+  public answer?: string | string[];
 
   // this is determined dynamically when an answer is recorded,
   // after evaluating all the conditions for the questions below

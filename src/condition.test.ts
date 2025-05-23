@@ -4,54 +4,143 @@ import { Question } from "./question";
 import { Condition } from "./condition";
 
 describe("Conditional Expression", () => {
-  it("equals - false example", () => {
-    const condition = new Condition(new Survey());
-    expect(condition.evaluate("(equals 'hi' 'ho')")).toBe(false);
-  });
-  it("equals - true example", () => {
-    const condition = new Condition(new Survey());
-    expect(condition.evaluate("(equals 'hi' 'hi')")).toBe(true);
+  describe("multiple expressions with or,and", () => {
+    it("and", () => {
+      const q1: Question = {
+        tag: "q1",
+      };
+      const q2: Question = {
+        tag: "q2",
+      };
+      const survey = new Survey().question(q1).question(q2);
+      survey.recordAnswer("q1", "apple");
+      survey.recordAnswer("q2", "pie");
+      expect(
+        new Condition(survey).evaluate(
+          "(and (equals (answer q1) 'apple') (equals (answer q2) 'pie'))"
+        )
+      ).toBe(true);
+    });
+
+    it("or - match", () => {
+      const q1: Question = {
+        tag: "q1",
+      };
+      const q2: Question = {
+        tag: "q2",
+      };
+      const survey = new Survey().question(q1).question(q2);
+      survey.recordAnswer("q1", "apple");
+      survey.recordAnswer("q2", "pie");
+      expect(
+        new Condition(survey).evaluate(
+          "(or (equals (answer q1) 'apple') (equals (answer q2) 'bust'))"
+        )
+      ).toBe(true);
+    });
+    it("or - no match", () => {
+      const q1: Question = {
+        tag: "q1",
+      };
+      const q2: Question = {
+        tag: "q2",
+      };
+      const survey = new Survey().question(q1).question(q2);
+      survey.recordAnswer("q1", "apple");
+      survey.recordAnswer("q2", "pie");
+      expect(
+        new Condition(survey).evaluate(
+          "(or (equals (answer q1) 'rusr') (equals (answer q2) 'nails'))"
+        )
+      ).toBe(false);
+    });
   });
 
-  it("not equals - true example", () => {
-    const condition = new Condition(new Survey());
-    expect(condition.evaluate("(not (equals 'hi' 'hi'))")).toBe(false);
-  });
-  it("question lookup - answer is on right", () => {
-    const q1: Question = {
-      tag: "q1",
-    };
-    const survey = new Survey().question(q1);
-    survey.recordAnswer("q1", "hello");
-    const condition = new Condition(survey);
-    expect(condition.evaluate("(equals 'hello' (answer q1))")).toBe(true);
+  describe("equals", () => {
+    it("equals - false with literals", () => {
+      expect(new Condition(new Survey()).evaluate("(equals 'hi' 'ho')")).toBe(
+        false
+      );
+    });
+    it("equals - true with literals", () => {
+      expect(new Condition(new Survey()).evaluate("(equals 'hi' 'hi')")).toBe(
+        true
+      );
+    });
+
+    it("not equals - with literals", () => {
+      expect(
+        new Condition(new Survey()).evaluate("(not (equals 'hi' 'hi'))")
+      ).toBe(false);
+    });
+    it("equals answer - on right", () => {
+      const q1: Question = {
+        tag: "q1",
+      };
+      const survey = new Survey().question(q1);
+      survey.recordAnswer("q1", "hello");
+      expect(
+        new Condition(survey).evaluate("(equals 'hello' (answer q1))")
+      ).toBe(true);
+    });
+    it("equals answer  -  on left", () => {
+      const q1: Question = {
+        tag: "q1",
+      };
+      const survey = new Survey().question(q1);
+      survey.recordAnswer("q1", "hellow");
+      expect(
+        new Condition(survey).evaluate("(equals (answer q1) 'hello')")
+      ).toBe(false);
+    });
+
+    it("equals answer  -  on both side", () => {
+      const q1: Question = {
+        tag: "q1",
+      };
+      const q2: Question = {
+        tag: "q2",
+      };
+      const survey = new Survey().question(q1).question(q2);
+      survey.recordAnswer("q1", "hellow");
+      survey.recordAnswer("q2", "hellow");
+      expect(
+        new Condition(survey).evaluate("(equals (answer q1) (answer q2))")
+      ).toBe(true);
+    });
   });
 
-  it("question lookup - answer is on left", () => {
-    const q1: Question = {
-      tag: "q1",
-    };
-    const survey = new Survey().question(q1);
-    survey.recordAnswer("q1", "hellow");
-    const condition = new Condition(survey);
-    expect(condition.evaluate("(equals (answer q1) 'hello')")).toBe(false);
-  });
+  describe("includes", () => {
+    it("includes with lookup, and passes", () => {
+      const q: Question = {
+        tag: "q",
+      };
+      const survey = new Survey().question(q);
+      survey.recordAnswer("q", ["apple", "pear", "plum"]);
+      expect(
+        new Condition(survey).evaluate("(includes (answer q) 'apple')")
+      ).toBe(true);
+    });
 
-  it("and example", () => {
-    const q1: Question = {
-      tag: "q1",
-    };
-    const q2: Question = {
-      tag: "q2",
-    };
-    const survey = new Survey().question(q1).question(q2);
-    survey.recordAnswer("q1", "apple");
-    survey.recordAnswer("q2", "pie");
-    const condition = new Condition(survey);
-    expect(
-      condition.evaluate(
-        "(and (equals (answer q1) 'apple') (equals (answer q2) 'pie'))"
-      )
-    ).toBe(true);
+    it("includes with lookup, and fails", () => {
+      const q: Question = {
+        tag: "q",
+      };
+      const survey = new Survey().question(q);
+      survey.recordAnswer("q", ["apple", "pear", "plum"]);
+      expect(
+        new Condition(survey).evaluate("(includes (answer q) 'apples')")
+      ).toBe(false);
+    });
+    it("includes with literal array", () => {
+      const q: Question = {
+        tag: "q",
+      };
+      expect(
+        new Condition(new Survey()).evaluate(
+          "(includes ['pear', 'apple'] 'apple')"
+        )
+      ).toBe(true);
+    });
   });
 });

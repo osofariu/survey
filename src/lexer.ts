@@ -12,6 +12,10 @@ export const StringValue = createToken({
   name: "StringValue",
   pattern: /'[a-zA-Z0-9]+'/,
 });
+export const StringArrayValue = createToken({
+  name: "StringArrayValue",
+  pattern: /\['[a-zA-Z0-9]+'(,\s*'[a-zA-Z0-9]+')*\]/,
+});
 export const Identifier = createToken({
   name: "Identifier",
   pattern: /[a-zA-Z0-9]+/,
@@ -33,6 +37,7 @@ export const allTokens = [
   And,
   Or,
   StringValue,
+  StringArrayValue,
   Identifier,
   WhiteSpace,
 ];

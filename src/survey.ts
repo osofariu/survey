@@ -9,19 +9,19 @@ export class Survey {
   traverse(): QuestionState[] {
     throw new Error("not Implemented");
   }
-  recordAnswer(questionTag: string, answer: string): void {
-    const findQuestion = this.questions.find(
+  recordAnswer(questionTag: string, answer: string | string[]): void {
+    const fondQuestion = this.questions.find(
       (question: QuestionState) => question.tag === questionTag
     );
-    if (findQuestion) {
-      findQuestion.answer = answer;
+    if (fondQuestion) {
+      fondQuestion.answer = answer;
     }
   }
-  lookupAnswer(questionTag: string): string | undefined {
+  lookupAnswer(questionTag: string): string | string[] | undefined {
     const lookup = this.questions.find(
       (question: QuestionState) => question.tag === questionTag
     );
-    console.log(`lookup question ${questionTag}: ${lookup}`);
+    console.log(`lookup question ${questionTag}: ${JSON.stringify(lookup)}`);
 
     return lookup?.answer;
   }

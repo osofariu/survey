@@ -2,6 +2,7 @@ import { CstParser, tokenLabel } from "chevrotain";
 import {
   allTokens,
   And,
+  Or,
   Answer,
   Equals,
   Identifier,
@@ -11,7 +12,7 @@ import {
   RParen,
   StringValue,
   WhiteSpace,
-  Comma,
+  StringArrayValue,
 } from "./lexer";
 
 export class ExpressionParser extends CstParser {
@@ -24,10 +25,34 @@ export class ExpressionParser extends CstParser {
     return this.OR([
       { ALT: () => this.SUBRULE(this.equalsRule) },
       { ALT: () => this.SUBRULE(this.notRule) },
-      // { ALT: () => this.SUBRULE(this._includes) },
+      { ALT: () => this.SUBRULE(this.includesRule) },
       { ALT: () => this.SUBRULE(this.andRule) },
-      // { ALT: () => this.SUBRULE(this.or_) },
+      { ALT: () => this.SUBRULE(this.orRule) },
     ]);
+  });
+
+  private includesRule = this.RULE("includesRule", () => {
+    this.CONSUME(LParen);
+    this.CONSUME(Includes);
+    this.SUBRULE1(this.stringArrayExpressionRule, { LABEL: "left" });
+    this.SUBRULE2(this.stringExpressionRule, { LABEL: "right" });
+    this.CONSUME(RParen);
+  });
+
+  private andRule = this.RULE("andRule", () => {
+    this.CONSUME(LParen);
+    this.CONSUME(And);
+    this.SUBRULE1(this.booleanExpressionRule, { LABEL: "lhs" });
+    this.SUBRULE2(this.booleanExpressionRule, { LABEL: "rhs" });
+    this.CONSUME(RParen);
+  });
+
+  private orRule = this.RULE("orRule", () => {
+    this.CONSUME(LParen);
+    this.CONSUME(Or);
+    const left = this.SUBRULE1(this.booleanExpressionRule, { LABEL: "lhs" });
+    const right = this.SUBRULE2(this.booleanExpressionRule, { LABEL: "rhs" });
+    this.CONSUME(RParen);
   });
 
   public stringExpressionRule = this.RULE("stringExpressionRule", () => {
@@ -35,6 +60,37 @@ export class ExpressionParser extends CstParser {
       { ALT: () => this.SUBRULE(this.answerRule) },
       { ALT: () => this.SUBRULE(this.StringRule) },
     ]);
+  });
+
+  public stringArrayExpressionRule = this.RULE(
+    "stringArrayExpressionRule",
+    () => {
+      return this.OR([
+        { ALT: () => this.SUBRULE(this.answerArrayRule) },
+        { ALT: () => this.SUBRULE(this.StringArrayRule) },
+      ]);
+    }
+  );
+  private StringRule = this.RULE("StringRule", () => {
+    this.CONSUME(StringValue);
+  });
+
+  private StringArrayRule = this.RULE("StringArrayRule", () => {
+    this.CONSUME(StringArrayValue);
+  });
+
+  private answerRule = this.RULE("answerRule", (): any => {
+    this.CONSUME(LParen);
+    this.CONSUME(Answer);
+    this.SUBRULE(this.IdentifierRule);
+    this.CONSUME(RParen);
+  });
+
+  private answerArrayRule = this.RULE("answerArrayRule", (): any => {
+    this.CONSUME(LParen);
+    this.CONSUME(Answer);
+    this.SUBRULE(this.IdentifierRule);
+    this.CONSUME(RParen);
   });
 
   private equalsRule = this.RULE("equalsRule", () => {
@@ -52,45 +108,7 @@ export class ExpressionParser extends CstParser {
     this.CONSUME(RParen);
   });
 
-  private answerRule = this.RULE("answerRule", (): any => {
-    this.CONSUME(LParen);
-    this.CONSUME(Answer);
-    this.SUBRULE(this.IdentifierRule);
-    this.CONSUME(RParen);
-  });
-
   private IdentifierRule = this.RULE("IdentifierRule", (): any => {
     this.CONSUME(Identifier);
   });
-
-  // TODO: this needs more work - we need to introduce an array type
-  // private _includes = this.RULE("includes", () => {
-  //   this.CONSUME(LParen);
-  //   this.CONSUME(Includes);
-  //   this.SUBRULE1(this.stringExpressionRule);
-  //   this.CONSUME(WhiteSpace);
-  //   this.SUBRULE2(this.stringExpressionRule);
-  //   this.CONSUME(RParen);
-  // });
-
-  private andRule = this.RULE("andRule", () => {
-    this.CONSUME(LParen);
-    this.CONSUME(And);
-    this.SUBRULE1(this.booleanExpressionRule, { LABEL: "lhs" });
-    this.SUBRULE2(this.booleanExpressionRule, { LABEL: "rhs" });
-    this.CONSUME(RParen);
-  });
-
-  private StringRule = this.RULE("StringRule", () => {
-    this.CONSUME(StringValue);
-  });
-
-  //   private or_ = this.RULE("or", () => {
-  //     this.CONSUME(LParen);
-  //     this.CONSUME(Or);
-  //     const left = this.SUBRULE(this.expression);
-  //     const right = this.SUBRULE(this.expression);
-  //     this.CONSUME(RParen);
-  //     return left || right;
-  //   });
 }

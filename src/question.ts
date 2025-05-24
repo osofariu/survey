@@ -22,4 +22,17 @@ export interface Question {
   condition?: string;
 }
 
+export const buildQuestion = (tag: string, condition?: string): Question => {
+  if (condition) {
+    return {
+      tag,
+      condition,
+    };
+  } else {
+    return {
+      tag,
+    };
+  }
+};
+
 export type AnswerType = string | number | string[] | number[];

@@ -117,25 +117,31 @@ class ConditionVisitor extends BaseConditionVisitor {
   }
 
   // Answer rules with distinct types
-  valueAnswerRule(ctx: any): StringResult | NumericResult {
+  valueAnswerRule(ctx: any): StringResult | NumericResult | undefined {
     log.info(`valueAnswerRule; ctx: ${JSON.stringify(ctx)}\n`);
     const tag = this.visit(ctx.IdentifierRule);
     const answer = this.survey.lookupAnswer(tag);
-    if (typeof answer !== "string" && typeof answer !== "number") {
+    const answerType = typeof answer;
+    if (
+      Array.isArray(answer) ||
+      !["string", "number", "undefined"].includes(answerType)
+    ) {
       throw new Error(
-        `Expected string or number type answer for tag ${tag}, got ${typeof answer}`
+        `Expected undefined or of type string or number looking up answer for tag ${tag}, got ${answerType}`
       );
     }
     return answer;
   }
 
-  arrayAnswerRule(ctx: any): StringArrayResult | NumericArrayResult {
+  arrayAnswerRule(
+    ctx: any
+  ): StringArrayResult | NumericArrayResult | undefined {
     log.info(`arrayAnswerRule; ctx: ${JSON.stringify(ctx)}\n`);
     const tag = this.visit(ctx.IdentifierRule);
     const answer = this.survey.lookupAnswer(tag);
     if (!Array.isArray(answer)) {
       throw new Error(
-        `Expected array answer for tag ${tag}, got ${typeof answer}`
+        `Expected array answer looking up answer for tag ${tag}, got ${typeof answer}`
       );
     }
     return answer;

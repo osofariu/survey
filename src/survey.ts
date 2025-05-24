@@ -21,6 +21,9 @@ export class Survey {
     const lookup = this.questions.find(
       (question: QuestionState) => question.tag === questionTag
     );
-    return lookup?.answer;
+    if (lookup === undefined) {
+      throw new Error(`Failed to find questions with tag: ${questionTag}`);
+    }
+    return lookup.answer;
   }
 }

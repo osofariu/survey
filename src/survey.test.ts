@@ -70,9 +70,10 @@ describe("Survey", () => {
       expect(answer).toBeUndefined();
     });
 
-    it("should return undefined for a non-existent question", () => {
-      const answer = survey.lookupAnswer("q3");
-      expect(answer).toBeUndefined();
+    it("should throw error for a non-existent question", () => {
+      expect(() => survey.lookupAnswer("q3")).toThrow(
+        Error("Failed to find questions with tag: q3")
+      );
     });
   });
 });

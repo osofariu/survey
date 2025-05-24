@@ -8,8 +8,6 @@ log.setLevel(log.levels.WARN);
 const parserInstance = new ExpressionParser();
 const BaseConditionVisitor = parserInstance.getBaseCstVisitorConstructor();
 
-// Type definitions for better type safety
-type ValueType = string | string[] | number;
 type BooleanResult = boolean;
 type StringResult = string;
 type NumericResult = number;
@@ -34,66 +32,44 @@ class ConditionVisitor extends BaseConditionVisitor {
   // Boolean expressions
   booleanExpressionRule(ctx: any): BooleanResult {
     log.info(`booleanExpressionRule; ctx: ${JSON.stringify(ctx)}\n`);
-    if (ctx.comparisonRule) {
-      return this.visit(ctx.comparisonRule);
-    } else if (ctx.logicalRule) {
-      return this.visit(ctx.logicalRule);
-    }
+    if (ctx.comparisonRule) return this.visit(ctx.comparisonRule);
+    if (ctx.logicalRule) return this.visit(ctx.logicalRule);
+
     throw new Error(`Invalid boolean expression: ${JSON.stringify(ctx)}`);
   }
 
   // Comparison expressions
   comparisonRule(ctx: any): BooleanResult {
     log.info(`comparisonRule; ctx: ${JSON.stringify(ctx)}\n`);
-    if (ctx.equalsRule) {
-      return this.visit(ctx.equalsRule);
-    } else if (ctx.includesRule) {
-      return this.visit(ctx.includesRule);
-    }
+    if (ctx.equalsRule) return this.visit(ctx.equalsRule);
+    if (ctx.includesRule) return this.visit(ctx.includesRule);
+
     throw new Error(`Invalid comparison expression: ${JSON.stringify(ctx)}`);
   }
 
   // Logical expressions
   logicalRule(ctx: any): BooleanResult {
     log.info(`logicalRule; ctx: ${JSON.stringify(ctx)}\n`);
-    if (ctx.notRule) {
-      return this.visit(ctx.notRule);
-    } else if (ctx.andRule) {
-      return this.visit(ctx.andRule);
-    } else if (ctx.orRule) {
-      return this.visit(ctx.orRule);
-    }
-    throw new Error(`Invalid logical expression: ${JSON.stringify(ctx)}`);
-  }
+    if (ctx.notRule) return this.visit(ctx.notRule);
+    if (ctx.andRule) return this.visit(ctx.andRule);
+    if (ctx.orRule) return this.visit(ctx.orRule);
 
-  // Value expressions
-  valueExpressionRule(ctx: any): ValueType {
-    log.info(`valueExpressionRule; ctx: ${JSON.stringify(ctx)}\n`);
-    if (ctx.stringExpressionRule) {
-      return this.visit(ctx.stringExpressionRule);
-    } else if (ctx.stringArrayExpressionRule) {
-      return this.visit(ctx.stringArrayExpressionRule);
-    }
-    throw new Error(`Invalid value expression: ${JSON.stringify(ctx)}`);
+    throw new Error(`Invalid logical expression: ${JSON.stringify(ctx)}`);
   }
 
   elementExpressionRule(ctx: any): StringResult | NumericResult {
     log.info(`elementExpressionRule; ctx: ${JSON.stringify(ctx)}\n`);
-    if (ctx.valueRule) {
-      return this.visit(ctx.valueRule);
-    } else if (ctx.valueAnswerRule) {
-      return this.visit(ctx.valueAnswerRule);
-    }
+    if (ctx.valueRule) return this.visit(ctx.valueRule);
+    if (ctx.valueAnswerRule) return this.visit(ctx.valueAnswerRule);
+
     throw new Error(`Invalid element expression: ${JSON.stringify(ctx)}`);
   }
 
   arrayExpressionRule(ctx: any): StringArrayResult | NumericArrayResult {
     log.info(`arrayExpressionRule; ctx: ${JSON.stringify(ctx)}\n`);
-    if (ctx.ValueArrayRule) {
-      return this.visit(ctx.ValueArrayRule);
-    } else if (ctx.arrayAnswerRule) {
-      return this.visit(ctx.arrayAnswerRule);
-    }
+    if (ctx.ValueArrayRule) return this.visit(ctx.ValueArrayRule);
+    if (ctx.arrayAnswerRule) return this.visit(ctx.arrayAnswerRule);
+
     throw new Error(`Invalid string array expression: ${JSON.stringify(ctx)}`);
   }
 
@@ -139,33 +115,6 @@ class ConditionVisitor extends BaseConditionVisitor {
     if (ctx.NumericRule) return this.visit(ctx.NumericRule);
     throw new Error(`Unexpected valueRule: ${JSON.stringify(ctx)}`);
   }
-  // Value rules
-  StringRule(ctx: any): StringResult {
-    log.info(`StringRule; ctx: ${JSON.stringify(ctx)}\n`);
-    const result = ctx.StringValue[0].image;
-    return result.replace(/^'|'$/g, "");
-  }
-
-  NumericRule(ctx: any): NumericResult {
-    log.info(`NumericRule; ctx: ${JSON.stringify(ctx)}\n`);
-    return Number(ctx.Numeric[0].image.replace(/^'|'$/g, ""));
-  }
-
-  ValueArrayRule(ctx: any): StringArrayResult | NumericArrayResult {
-    log.info(`ValueArrayRule; ctx: ${JSON.stringify(ctx)}\n`);
-    let arrayToParse;
-    if (ctx.StringArrayValue) {
-      arrayToParse = ctx.StringArrayValue[0].image;
-      arrayToParse = arrayToParse.replaceAll("'", '"');
-    } else {
-      arrayToParse = ctx.NumericArrayValue[0].image;
-    }
-    try {
-      return JSON.parse(arrayToParse);
-    } catch (e) {
-      throw new Error(`Failed to parse array expression: ${arrayToParse}`);
-    }
-  }
 
   // Answer rules with distinct types
   valueAnswerRule(ctx: any): StringResult | NumericResult {
@@ -190,6 +139,34 @@ class ConditionVisitor extends BaseConditionVisitor {
       );
     }
     return answer;
+  }
+
+  // Value rules
+  StringRule(ctx: any): StringResult {
+    log.info(`StringRule; ctx: ${JSON.stringify(ctx)}\n`);
+    const result = ctx.StringValue[0].image;
+    return result.replace(/^'|'$/g, ""); // strip-off single quotes
+  }
+
+  NumericRule(ctx: any): NumericResult {
+    log.info(`NumericRule; ctx: ${JSON.stringify(ctx)}\n`);
+    return Number(ctx.Numeric[0].image.replace(/^'|'$/g, "")); // strip-off single quotes
+  }
+
+  ValueArrayRule(ctx: any): StringArrayResult | NumericArrayResult {
+    log.info(`ValueArrayRule; ctx: ${JSON.stringify(ctx)}\n`);
+    let arrayToParse;
+    if (ctx.StringArrayValue) {
+      arrayToParse = ctx.StringArrayValue[0].image;
+      arrayToParse = arrayToParse.replaceAll("'", '"'); // needs double quotes to parse as JSON object
+    } else {
+      arrayToParse = ctx.NumericArrayValue[0].image;
+    }
+    try {
+      return JSON.parse(arrayToParse);
+    } catch (e) {
+      throw new Error(`Failed to parse array expression: ${arrayToParse}`);
+    }
   }
 
   IdentifierRule(ctx: any): string {

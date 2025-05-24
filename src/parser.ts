@@ -112,15 +112,6 @@ export class ExpressionParser extends CstParser {
     this.CONSUME(RParen);
   });
 
-  // Value rules
-  private StringRule = this.RULE("StringRule", () => {
-    this.CONSUME(StringValue);
-  });
-
-  private NumericRule = this.RULE("NumericRule", () => {
-    this.CONSUME(NumericValue);
-  });
-
   private valueRule = this.RULE("valueRule", () => {
     return this.OR([
       { ALT: () => this.SUBRULE(this.StringRule) },
@@ -128,14 +119,6 @@ export class ExpressionParser extends CstParser {
     ]);
   });
 
-  private ValueArrayRule = this.RULE("ValueArrayRule", () => {
-    return this.OR([
-      { ALT: () => this.CONSUME(StringArrayValue) },
-      { ALT: () => this.CONSUME(NumericArrayValue) },
-    ]);
-  });
-
-  // Answer rules with distinct keywords
   private valueAnswerRule = this.RULE("valueAnswerRule", () => {
     this.CONSUME(LParen);
     this.CONSUME(Answer);
@@ -148,6 +131,23 @@ export class ExpressionParser extends CstParser {
     this.CONSUME(ArrayAnswer);
     this.SUBRULE(this.IdentifierRule);
     this.CONSUME(RParen);
+  });
+
+  // Terminal rules (these are capitalized)
+
+  private StringRule = this.RULE("StringRule", () => {
+    this.CONSUME(StringValue);
+  });
+
+  private NumericRule = this.RULE("NumericRule", () => {
+    this.CONSUME(NumericValue);
+  });
+
+  private ValueArrayRule = this.RULE("ValueArrayRule", () => {
+    return this.OR([
+      { ALT: () => this.CONSUME(StringArrayValue) },
+      { ALT: () => this.CONSUME(NumericArrayValue) },
+    ]);
   });
 
   private IdentifierRule = this.RULE("IdentifierRule", () => {

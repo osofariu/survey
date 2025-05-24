@@ -1,4 +1,4 @@
-import { Question, QuestionState } from "./question";
+import { AnswerType, Question, QuestionState } from "./question";
 
 export class Survey {
   questions: QuestionState[] = [];
@@ -9,7 +9,7 @@ export class Survey {
   traverse(): QuestionState[] {
     throw new Error("not Implemented");
   }
-  recordAnswer(questionTag: string, answer: string | string[]): void {
+  recordAnswer(questionTag: string, answer?: AnswerType): void {
     const fondQuestion = this.questions.find(
       (question: QuestionState) => question.tag === questionTag
     );
@@ -17,12 +17,10 @@ export class Survey {
       fondQuestion.answer = answer;
     }
   }
-  lookupAnswer(questionTag: string): string | string[] | undefined {
+  lookupAnswer(questionTag: string): AnswerType | undefined {
     const lookup = this.questions.find(
       (question: QuestionState) => question.tag === questionTag
     );
-    console.log(`lookup question ${questionTag}: ${JSON.stringify(lookup)}`);
-
     return lookup?.answer;
   }
 }

@@ -8,7 +8,7 @@ export class QuestionState implements Question {
   }
 
   // store current answer state when it's recorded
-  public answer?: string | string[];
+  public answer?: AnswerType;
 
   // this is determined dynamically when an answer is recorded,
   // after evaluating all the conditions for the questions below
@@ -21,3 +21,5 @@ export interface Question {
   tag: string;
   condition?: string;
 }
+
+export type AnswerType = string | number | string[] | number[];

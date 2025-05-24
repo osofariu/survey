@@ -1,7 +1,9 @@
-import { lex, lexer } from "./lexer";
+import { lex } from "./lexer";
 import { ExpressionParser } from "./parser";
 import { Survey } from "./survey";
-import { createToken, Lexer, CstParser, CstNode } from "chevrotain";
+import log from "loglevel";
+
+log.setLevel(log.levels.WARN);
 
 const parserInstance = new ExpressionParser();
 const BaseConditionVisitor = parserInstance.getBaseCstVisitorConstructor();
@@ -25,11 +27,13 @@ class ConditionVisitor extends BaseConditionVisitor {
 
   // Top level expression rule
   expressionRule(ctx: any): BooleanResult {
+    log.info(`expressionRule; ctx: ${JSON.stringify(ctx)}\n`);
     return this.visit(ctx.booleanExpressionRule);
   }
 
   // Boolean expressions
   booleanExpressionRule(ctx: any): BooleanResult {
+    log.info(`booleanExpressionRule; ctx: ${JSON.stringify(ctx)}\n`);
     if (ctx.comparisonRule) {
       return this.visit(ctx.comparisonRule);
     } else if (ctx.logicalRule) {
@@ -40,6 +44,7 @@ class ConditionVisitor extends BaseConditionVisitor {
 
   // Comparison expressions
   comparisonRule(ctx: any): BooleanResult {
+    log.info(`comparisonRule; ctx: ${JSON.stringify(ctx)}\n`);
     if (ctx.equalsRule) {
       return this.visit(ctx.equalsRule);
     } else if (ctx.includesRule) {
@@ -50,6 +55,7 @@ class ConditionVisitor extends BaseConditionVisitor {
 
   // Logical expressions
   logicalRule(ctx: any): BooleanResult {
+    log.info(`logicalRule; ctx: ${JSON.stringify(ctx)}\n`);
     if (ctx.notRule) {
       return this.visit(ctx.notRule);
     } else if (ctx.andRule) {
@@ -62,6 +68,7 @@ class ConditionVisitor extends BaseConditionVisitor {
 
   // Value expressions
   valueExpressionRule(ctx: any): ValueType {
+    log.info(`valueExpressionRule; ctx: ${JSON.stringify(ctx)}\n`);
     if (ctx.stringExpressionRule) {
       return this.visit(ctx.stringExpressionRule);
     } else if (ctx.stringArrayExpressionRule) {
@@ -71,6 +78,7 @@ class ConditionVisitor extends BaseConditionVisitor {
   }
 
   elementExpressionRule(ctx: any): StringResult | NumericResult {
+    log.info(`elementExpressionRule; ctx: ${JSON.stringify(ctx)}\n`);
     if (ctx.valueRule) {
       return this.visit(ctx.valueRule);
     } else if (ctx.valueAnswerRule) {
@@ -80,6 +88,7 @@ class ConditionVisitor extends BaseConditionVisitor {
   }
 
   arrayExpressionRule(ctx: any): StringArrayResult | NumericArrayResult {
+    log.info(`arrayExpressionRule; ctx: ${JSON.stringify(ctx)}\n`);
     if (ctx.ValueArrayRule) {
       return this.visit(ctx.ValueArrayRule);
     } else if (ctx.arrayAnswerRule) {
@@ -90,12 +99,14 @@ class ConditionVisitor extends BaseConditionVisitor {
 
   // Comparison rules
   equalsRule(ctx: any): BooleanResult {
+    log.info(`equalsRule; ctx: ${JSON.stringify(ctx)}\n`);
     const left = this.visit(ctx.lhs);
     const right = this.visit(ctx.rhs);
     return left === right;
   }
 
   includesRule(ctx: any): BooleanResult {
+    log.info(`includesRule; ctx: ${JSON.stringify(ctx)}\n`);
     const left = this.visit(ctx.left);
     const right = this.visit(ctx.right);
     if (!Array.isArray(left)) {
@@ -108,36 +119,46 @@ class ConditionVisitor extends BaseConditionVisitor {
 
   // Logical rules
   notRule(ctx: any): BooleanResult {
+    log.info(`notRule; ctx: ${JSON.stringify(ctx)}\n`);
     return !this.visit(ctx.booleanExpressionRule);
   }
 
   andRule(ctx: any): BooleanResult {
+    log.info(`andRule; ctx: ${JSON.stringify(ctx)}\n`);
     return this.visit(ctx.lhs) && this.visit(ctx.rhs);
   }
 
   orRule(ctx: any): BooleanResult {
+    log.info(`orRule; ctx: ${JSON.stringify(ctx)}\n`);
     return this.visit(ctx.lhs) || this.visit(ctx.rhs);
   }
 
   valueRule(ctx: any): NumericResult | StringResult {
+    log.info(`valueRule; ctx: ${JSON.stringify(ctx)}\n`);
     if (ctx.StringRule) return this.visit(ctx.StringRule);
-    if (ctx.NumericResult) return this.visit(ctx.NumericRule);
+    if (ctx.NumericRule) return this.visit(ctx.NumericRule);
     throw new Error(`Unexpected valueRule: ${JSON.stringify(ctx)}`);
   }
   // Value rules
   StringRule(ctx: any): StringResult {
+    log.info(`StringRule; ctx: ${JSON.stringify(ctx)}\n`);
     const result = ctx.StringValue[0].image;
     return result.replace(/^'|'$/g, "");
   }
 
-  NumericRule(ctx: any): StringResult {
-    return ctx.StringValue[0].image;
+  NumericRule(ctx: any): NumericResult {
+    log.info(`NumericRule; ctx: ${JSON.stringify(ctx)}\n`);
+    return Number(ctx.Numeric[0].image.replace(/^'|'$/g, ""));
   }
 
-  ValueArrayRule(ctx: any): StringArrayResult {
-    let arrayToParse = ctx.StringArrayValue[0].image;
+  ValueArrayRule(ctx: any): StringArrayResult | NumericArrayResult {
+    log.info(`ValueArrayRule; ctx: ${JSON.stringify(ctx)}\n`);
+    let arrayToParse;
     if (ctx.StringArrayValue) {
+      arrayToParse = ctx.StringArrayValue[0].image;
       arrayToParse = arrayToParse.replaceAll("'", '"');
+    } else {
+      arrayToParse = ctx.NumericArrayValue[0].image;
     }
     try {
       return JSON.parse(arrayToParse);
@@ -148,6 +169,7 @@ class ConditionVisitor extends BaseConditionVisitor {
 
   // Answer rules with distinct types
   valueAnswerRule(ctx: any): StringResult | NumericResult {
+    log.info(`valueAnswerRule; ctx: ${JSON.stringify(ctx)}\n`);
     const tag = this.visit(ctx.IdentifierRule);
     const answer = this.survey.lookupAnswer(tag);
     if (typeof answer !== "string" && typeof answer !== "number") {
@@ -158,7 +180,8 @@ class ConditionVisitor extends BaseConditionVisitor {
     return answer;
   }
 
-  arrayAnswerRule(ctx: any): StringArrayResult {
+  arrayAnswerRule(ctx: any): StringArrayResult | NumericArrayResult {
+    log.info(`arrayAnswerRule; ctx: ${JSON.stringify(ctx)}\n`);
     const tag = this.visit(ctx.IdentifierRule);
     const answer = this.survey.lookupAnswer(tag);
     if (!Array.isArray(answer)) {
@@ -170,6 +193,7 @@ class ConditionVisitor extends BaseConditionVisitor {
   }
 
   IdentifierRule(ctx: any): string {
+    log.info(`IdentifierRule; ctx: ${JSON.stringify(ctx)}\n`);
     return ctx.Identifier[0].image;
   }
 }

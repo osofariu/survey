@@ -26,8 +26,9 @@ export const StringArrayValue = createToken({
 });
 
 export const NumericArrayValue = createToken({
-  name: "StringArrayValue",
-  pattern: /\[[0-9]+(\.[0-9]+)?|\.[0-9]+(,\s*[0-9]+(\.[0-9]+)?|\.[0-9]+\])/,
+  name: "NumericArrayValue",
+  pattern:
+    /\[([0-9]+(\.[0-9]+)?|\.[0-9]+)(,\s*([0-9]+(\.[0-9]+)?|\.[0-9]+))*\]/,
 });
 
 export const Identifier = createToken({
@@ -54,6 +55,7 @@ export const allTokens = [
   StringValue,
   NumericValue,
   StringArrayValue,
+  NumericArrayValue,
   Identifier,
   WhiteSpace,
 ];

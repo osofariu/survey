@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Survey } from "./survey";
-import { Question } from "./question";
+import { Question, QuestionState } from "./question";
 import { Condition } from "./condition";
 
 describe("Conditional Expression", () => {
@@ -115,6 +115,26 @@ describe("Conditional Expression", () => {
         expect(new Condition(new Survey()).evaluate("(equals 12 22)")).toBe(
           false
         );
+      });
+      it("equals - true with literals", () => {
+        expect(new Condition(new Survey()).evaluate("(equals 12 12)")).toBe(
+          true
+        );
+      });
+    });
+    describe("array types", () => {
+      it("equals - false with literals", () => {
+        const q1: Question = {
+          tag: "q1",
+        };
+        const survey = new Survey().question(q1);
+        survey.recordAnswer("q1", [12, 21]);
+        expect(new Condition(survey).evaluate("(includes [12, 21] 12)")).toBe(
+          true
+        );
+        expect(
+          new Condition(survey).evaluate("(includes (arrayAnswer q1) 12)")
+        ).toBe(true);
       });
     });
   });

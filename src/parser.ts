@@ -129,8 +129,10 @@ export class ExpressionParser extends CstParser {
   });
 
   private ValueArrayRule = this.RULE("ValueArrayRule", () => {
-    return this.OR([{ ALT: () => this.CONSUME(StringArrayValue) }]);
-    return this.OR([{ ALT: () => this.CONSUME(NumericArrayValue) }]);
+    return this.OR([
+      { ALT: () => this.CONSUME(StringArrayValue) },
+      { ALT: () => this.CONSUME(NumericArrayValue) },
+    ]);
   });
 
   // Answer rules with distinct keywords

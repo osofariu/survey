@@ -16,6 +16,8 @@ import {
   StringArrayValue,
   NumericValue,
   NumericArrayValue,
+  Greater,
+  Less,
 } from "./lexer";
 import { config } from "process";
 
@@ -43,6 +45,8 @@ export class ExpressionParser extends CstParser {
   private comparisonRule = this.RULE("comparisonRule", () => {
     return this.OR([
       { ALT: () => this.SUBRULE(this.equalsRule) },
+      { ALT: () => this.SUBRULE(this.greaterRule) },
+      { ALT: () => this.SUBRULE(this.lessRule) },
       { ALT: () => this.SUBRULE(this.includesRule) },
     ]);
   });
@@ -75,6 +79,22 @@ export class ExpressionParser extends CstParser {
   private equalsRule = this.RULE("equalsRule", () => {
     this.CONSUME(LParen);
     this.CONSUME(Equals);
+    this.SUBRULE1(this.elementExpressionRule, { LABEL: "lhs" });
+    this.SUBRULE2(this.elementExpressionRule, { LABEL: "rhs" });
+    this.CONSUME(RParen);
+  });
+
+  private greaterRule = this.RULE("greaterRule", () => {
+    this.CONSUME(LParen);
+    this.CONSUME(Greater);
+    this.SUBRULE1(this.elementExpressionRule, { LABEL: "lhs" });
+    this.SUBRULE2(this.elementExpressionRule, { LABEL: "rhs" });
+    this.CONSUME(RParen);
+  });
+
+  private lessRule = this.RULE("lessRule", () => {
+    this.CONSUME(LParen);
+    this.CONSUME(Less);
     this.SUBRULE1(this.elementExpressionRule, { LABEL: "lhs" });
     this.SUBRULE2(this.elementExpressionRule, { LABEL: "rhs" });
     this.CONSUME(RParen);

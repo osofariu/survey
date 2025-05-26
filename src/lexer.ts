@@ -3,6 +3,8 @@ import { createToken, Lexer } from "chevrotain";
 export const LParen = createToken({ name: "LParen", pattern: /\(/ });
 export const RParen = createToken({ name: "RParen", pattern: /\)/ });
 export const Equals = createToken({ name: "Equals", pattern: /equals/ });
+export const Greater = createToken({ name: "Greater", pattern: />/ });
+export const Less = createToken({ name: "Less", pattern: /</ });
 export const Not = createToken({ name: "Not", pattern: /not/ });
 export const Answer = createToken({ name: "Answer", pattern: /answer/ });
 export const ArrayAnswer = createToken({
@@ -46,6 +48,8 @@ export const allTokens = [
   LParen,
   RParen,
   Equals,
+  Greater,
+  Less,
   Not,
   Answer,
   ArrayAnswer,

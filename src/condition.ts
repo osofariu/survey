@@ -42,6 +42,8 @@ class ConditionVisitor extends BaseConditionVisitor {
   comparisonRule(ctx: any): BooleanResult {
     log.info(`comparisonRule; ctx: ${JSON.stringify(ctx)}\n`);
     if (ctx.equalsRule) return this.visit(ctx.equalsRule);
+    if (ctx.greaterRule) return this.visit(ctx.greaterRule);
+    if (ctx.lessRule) return this.visit(ctx.lessRule);
     if (ctx.includesRule) return this.visit(ctx.includesRule);
 
     throw new Error(`Invalid comparison expression: ${JSON.stringify(ctx)}`);
@@ -79,6 +81,20 @@ class ConditionVisitor extends BaseConditionVisitor {
     const left = this.visit(ctx.lhs);
     const right = this.visit(ctx.rhs);
     return left === right;
+  }
+
+  greaterRule(ctx: any): BooleanResult {
+    log.info(`greaterRule; ctx: ${JSON.stringify(ctx)}\n`);
+    const left = this.visit(ctx.lhs);
+    const right = this.visit(ctx.rhs);
+    return left > right;
+  }
+
+  lessRule(ctx: any): BooleanResult {
+    log.info(`lessRule; ctx: ${JSON.stringify(ctx)}\n`);
+    const left = this.visit(ctx.lhs);
+    const right = this.visit(ctx.rhs);
+    return left < right;
   }
 
   includesRule(ctx: any): BooleanResult {

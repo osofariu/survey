@@ -151,6 +151,44 @@ describe("Conditional Expression", () => {
     });
   });
 
+  describe("greater than", () => {
+    it("is greater with literals", () => {
+      expect(evalWithSurvey("(> 20 10)")).toBe(true);
+    });
+    it("is not greater with literals", () => {
+      expect(evalWithSurvey("(> 20 30)")).toBe(false);
+    });
+    it("is greater with answer", () => {
+      const survey = surveyWithQuestionTags("q1");
+      survey.recordAnswer("q1", 100);
+      expect(evalWithSurvey("(> (answer q1) 99)", survey)).toBe(true);
+    });
+    it("is not greater with answer", () => {
+      const survey = surveyWithQuestionTags("q1");
+      survey.recordAnswer("q1", 100);
+      expect(evalWithSurvey("(> (answer q1) 101)", survey)).toBe(false);
+    });
+  });
+
+  describe("less than", () => {
+    it("is less with literals", () => {
+      expect(evalWithSurvey("(< 5 10)")).toBe(true);
+    });
+    it("is not less with literals", () => {
+      expect(evalWithSurvey("(< 20 10)")).toBe(false);
+    });
+    it("is less with answer", () => {
+      const survey = surveyWithQuestionTags("q1");
+      survey.recordAnswer("q1", 99);
+      expect(evalWithSurvey("(< (answer q1) 100)", survey)).toBe(true);
+    });
+    it("is not less with answer", () => {
+      const survey = surveyWithQuestionTags("q1");
+      survey.recordAnswer("q1", 100);
+      expect(evalWithSurvey("(< (answer q1) 99)", survey)).toBe(false);
+    });
+  });
+
   describe("includes", () => {
     describe("with string types", () => {
       it("includes with lookup, and passes", () => {

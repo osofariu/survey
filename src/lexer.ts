@@ -2,7 +2,7 @@ import { createToken, Lexer } from "chevrotain";
 
 export const LParen = createToken({ name: "LParen", pattern: /\(/ });
 export const RParen = createToken({ name: "RParen", pattern: /\)/ });
-export const Equals = createToken({ name: "Equals", pattern: /equals/ });
+export const Equals = createToken({ name: "Equals", pattern: /=/ });
 export const Greater = createToken({ name: "Greater", pattern: />/ });
 export const Less = createToken({ name: "Less", pattern: /</ });
 export const Not = createToken({ name: "Not", pattern: /not/ });

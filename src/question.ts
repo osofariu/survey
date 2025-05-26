@@ -1,10 +1,12 @@
 export class QuestionState implements Question {
   tag: string;
   condition?: string;
+  enabled: boolean;
 
   constructor(tag: string, conditionExp?: string) {
     this.tag = tag;
     this.condition = conditionExp;
+    this.enabled = true;
   }
 
   // store current answer state when it's recorded

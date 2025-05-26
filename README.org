@@ -12,7 +12,7 @@
 - The /condition/ is a string, matching a lisp-style expression. It supports the following operations:
     - (and boolean-exp-1 boolean-exp-2)
     - (or boolean-exp-1 boolean-exp-2)
-    - (equals string-exp-1 string-exp-2)
+    - (= string-exp-1 string-exp-2)
     - (includes array-exp string-exp)
     - (answer Identifier)
 
@@ -26,20 +26,26 @@ Conditions can be nested indefinitely as long as they conform to the grammar for
 
 I should define the grammar more formally, but the few examples below will help illustrate what you can do with conditions.
 
-*** equals -- compares two string expressions
+*** equals, greater, less -- compares two string expressions
+
+This is not very interesting when all arguments are literal values, but this is valid grammar
 
 #+BEGIN_SRC js
-    const exp1 = "(equals 'a' 'b')"
-    new Condition(new Survey()).evaluate(exp1) == false
+    new Condition(new Survey()).evaluate("(= 'a' 'b')") == false
+    new Condition(new Survey()).evaluate("(= 'a' 'a')" ) == true
+#+END_SRC
 
-    const exp2 = "(equals 'a' 'a')"  => true
-    new Condition(new Survey()).evaluate(exp2) == true
+**** with numeric comparisons
+
+#+BEGIN_SRC js
+    new Condition(new Survey()).evaluate("(> 100 99)") == true
+    new Condition(new Survey()).evaluate("(<  99 100)" ) == true
 #+END_SRC
 
 *** not -- negates an expression that it wraps
 
 #+BEGIN_SRC js
-    const exp = "(not (equals 'a' 'b'))"
+    const exp = "(not (= 'a' 'b'))"
     new Condition(new Survey()).evaluate(exp) == true
 #+END_SRC
 
@@ -49,14 +55,24 @@ I should define the grammar more formally, but the few examples below will help 
 #+BEGIN_SRC js
     const question: Question = {
       tag: "q1",
-      conditionExp: exp,
     };
     const survey = new Survey().question(question);
     survey.recordAnswer('q1' 'hello')
-    const exp1 = "(equals (answer q1) 'hello')"
-    new Condition(survey).evaluate(exp1) == true
-    const exp2 = "(equals (answer q1) 'hellowse')"
-    new Condition(survey).evaluate(exp2) == false
+    
+    new Condition(survey).evaluate("(= (answer q1) 'hello')") == true
+    new Condition(survey).evaluate("(= (answer q1) 'hellowse')") == false
+#+END_SRC
+
+**** This works with numbers too
+
+#+BEGIN_SRC js
+    const q1: Question = {tag: "q1"}
+    const q2: Question = {tag: "q2", condition: "(> (answer q1) 100)"}
+    const survey = new Survey().question(q1).question(q2);
+
+    survey.questions[1].enabled == true
+    survey.recordAnswer('q1' 100)
+    survey.questions[1].enabled == false 
 #+END_SRC
 
 *** includes - similar to equal, but it looks up a string in a list of strings
@@ -96,7 +112,7 @@ To help out parsing the gammar I used a different lookup keyword: arrayAnswer in
     const survey = new Survey().question(question1).question(question2);
     survey.recordAnswer('q1', 'hello')
     survey.recordAnswer('q2', 'there') 
-    const exp = "(not (and (equals (answer q1) "hello") (equals 'there' (answer q2))))" 
+    const exp = "(not (and (= (answer q1) "hello") (= 'there' (answer q2))))" 
     new Condition(survey).evaluate(exp) == false
 #+END_SRC
 

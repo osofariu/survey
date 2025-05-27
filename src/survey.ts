@@ -59,4 +59,12 @@ export class Survey {
     const question = this.traverse((q) => q.tag === questionTag)[0]; // array should not be empty
     return question && question.enabled;
   }
+
+  isAnsweredQuestion(questionTag: string): boolean {
+    const questions = this.traverse((q) => q.tag === questionTag);
+    if (questions === undefined || questions.length !== 1) {
+      throw new Error("TEST ME");
+    }
+    return questions[0].answer !== undefined;
+  }
 }

@@ -18,6 +18,7 @@ import {
   NumericArrayValue,
   Greater,
   Less,
+  isAnswered,
 } from "./lexer";
 import { config } from "process";
 
@@ -48,6 +49,7 @@ export class ExpressionParser extends CstParser {
       { ALT: () => this.SUBRULE(this.greaterRule) },
       { ALT: () => this.SUBRULE(this.lessRule) },
       { ALT: () => this.SUBRULE(this.includesRule) },
+      { ALT: () => this.SUBRULE(this.isAnsweredRule) },
     ]);
   });
 
@@ -105,6 +107,13 @@ export class ExpressionParser extends CstParser {
     this.CONSUME(Includes);
     this.SUBRULE1(this.arrayExpressionRule, { LABEL: "left" });
     this.SUBRULE2(this.elementExpressionRule, { LABEL: "right" });
+    this.CONSUME(RParen);
+  });
+
+  private isAnsweredRule = this.RULE("isAnsweredRule", () => {
+    this.CONSUME(LParen);
+    this.CONSUME(isAnswered);
+    this.SUBRULE(this.IdentifierRule);
     this.CONSUME(RParen);
   });
 

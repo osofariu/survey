@@ -55,6 +55,7 @@ class ConditionVisitor extends BaseConditionVisitor {
     if (ctx.greaterRule) return this.visit(ctx.greaterRule);
     if (ctx.lessRule) return this.visit(ctx.lessRule);
     if (ctx.includesRule) return this.visit(ctx.includesRule);
+    if (ctx.isAnsweredRule) return this.visit(ctx.isAnsweredRule);
 
     throw new Error(`Invalid comparison expression: ${JSON.stringify(ctx)}`);
   }
@@ -141,6 +142,12 @@ class ConditionVisitor extends BaseConditionVisitor {
     if (ctx.StringRule) return this.visit(ctx.StringRule);
     if (ctx.NumericRule) return this.visit(ctx.NumericRule);
     throw new Error(`Unexpected valueRule: ${JSON.stringify(ctx)}`);
+  }
+
+  isAnsweredRule(ctx: any): boolean {
+    const tag = this.visit(ctx.IdentifierRule);
+    this.dependentQuestionTags.push(tag);
+    return this.survey.isAnsweredQuestion(tag);
   }
 
   // Answer rules with distinct types

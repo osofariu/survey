@@ -181,6 +181,15 @@ describe("Conditional Expression", () => {
     });
   });
 
+  describe("isAnswered", () => {
+    it("isAnswered only after an answer was recorded", () => {
+      const survey = surveyWithQuestionTags("q1");
+      expect(evalWithSurvey("(isAnswered q1)", survey)).toBe(false);
+      survey.recordAnswer("q1", 100);
+      expect(evalWithSurvey("(isAnswered q1)", survey)).toBe(true);
+    });
+  });
+
   describe("includes", () => {
     describe("with string types", () => {
       it("includes with lookup, and passes", () => {

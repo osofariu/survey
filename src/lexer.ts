@@ -7,6 +7,10 @@ export const Greater = createToken({ name: "Greater", pattern: />/ });
 export const Less = createToken({ name: "Less", pattern: /</ });
 export const Not = createToken({ name: "Not", pattern: /not/ });
 export const Answer = createToken({ name: "Answer", pattern: /answer/ });
+export const isAnswered = createToken({
+  name: "isAnswered",
+  pattern: /isAnswered/,
+});
 export const ArrayAnswer = createToken({
   name: "ArrayAnswer",
   pattern: /arrayAnswer/,
@@ -52,6 +56,7 @@ export const allTokens = [
   Less,
   Not,
   Answer,
+  isAnswered,
   ArrayAnswer,
   Includes,
   And,

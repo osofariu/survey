@@ -1,29 +1,34 @@
 * Survey 
 
-- A Survey is made up of ordered Questions. The Survey tracks answers recorded for its questions, and determines which questions are active based on the optional condition associated with question.
+- A Survey is made up of ordered questions; the survey tracks answers to questions
+- Each question has an optional condition expression that enable or disables that question. 
+- The condition expression allows questions to depend on the state of previous questions
+- The Survey tracks answers recorded for its questions, and determines which questions are active by evaluating the corresponding condition.
 
 - The /condition/ is a string, matching a lisp-style expression. It supports the following operations:
     
-    - logical rules :: work on boolean expressions
+    - logical rules (work on boolean expressions)
         - and
         - or
         - not
-    - comparison rules :: work with strings and numbers
+    - comparison rules (work with strings and numbers)
         - equal (=)
         - less than (<)
         - greater than (>)
         - includes (array includes value)
-    - answer :: look up answer; works with stings and numbers or arrays of them
+        - isAnswered (a prior question has an answer)
+    - answer 
+        - look up answer to a prior question as a number of string
+        - look up answer to a prior question as an array of numbers of strings
 
-- When the Survey records an answer for a Question it updates the state for the questions that follow it:
-    - if a question changes its answer from what was previously recorded, the Survey re-evaluates all the following questions to see if their state needs to change
-    - if question A depends on question B should A be active if B is inactive (even if the condition holds?) TBD
+- The /survey/ disables dependent questions according to the following rules:
+    - if the condition associated with a question evaluates to false, then the question becomes disabled
+    - if a question becomes disabled then all the subsequent questions that *depend* on it also become disabled
+        - a question /depends/ on another question if it mentions the other question somewhere in its conditional expression
 
 ** Conditions
 
 Conditions can be nested indefinitely as long as they conform to the grammar for this conditonal expression.
-
-I should define the grammar more formally, but the few examples below will help illustrate what you can do with conditions.
 
 *** equals, greater, less -- compares two string expressions
 
@@ -48,14 +53,21 @@ This is not very interesting when all arguments are literal values, but this is 
     new Condition(new Survey()).evaluate(exp) == true
 #+END_SRC
 
-*** answer
-    it needs to look up an answer in the survey and return the value
+*** isAnswered
+    it checks if the question referenced has been answered
 
 #+BEGIN_SRC js
-    const question: Question = {
-      tag: "q1",
-    };
-    const survey = new Survey().question(question);
+    const survey = new Survey().question(buildQuestion({tag: "q1"}));
+    new Condition(survey).evaluate("(isAnswered q1)") == false
+    survey.recordAnswer('q1' 'hello')
+    new Condition(survey).evaluate("(isAnswered q1)") == true
+#+END_SRC
+
+*** answer
+    it looks up an answer in the /survey/ and return the value
+
+#+BEGIN_SRC js
+    const survey = new Survey().question(buildQuestion({tag: "q1"}));
     survey.recordAnswer('q1' 'hello')
     
     new Condition(survey).evaluate("(= (answer q1) 'hello')") == true

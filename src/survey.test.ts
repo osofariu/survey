@@ -18,7 +18,9 @@ describe("Survey", () => {
         .question({
           tag: "q3",
           condition: "(includes (arrayAnswer q2) 'red')",
-        });
+        })
+        .question({ tag: "q4", condition: "(isAnswered q1)" })
+        .question({ tag: "q5", condition: "(isAnswered q2)" });
     });
 
     it("when conditions pass, questions stay active", () => {
@@ -26,8 +28,7 @@ describe("Survey", () => {
       survey.recordAnswer("q2", ["blue", "red"]);
 
       let enabledQuestions = survey.traverse((q) => q.enabled);
-      expect(enabledQuestions.length).toBe(3);
-      expect(enabledQuestions.map((q) => q.tag)).toEqual(["q1", "q2", "q3"]);
+      expect(enabledQuestions.length).toBe(5);
     });
 
     it("when prior condition fails, all dependent conditions fail ", () => {
@@ -35,7 +36,7 @@ describe("Survey", () => {
       survey.recordAnswer("q2", ["blue", "red"]);
 
       const enabledQuestions = survey.traverse((q) => q.enabled);
-      expect(enabledQuestions.map((q) => q.tag)).toEqual(["q1"]);
+      expect(enabledQuestions.map((q) => q.tag)).toEqual(["q1", "q4"]);
     });
   });
   describe("question()", () => {

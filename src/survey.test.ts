@@ -10,7 +10,7 @@ describe("Survey", () => {
     survey = new Survey();
   });
 
-  describe("record answer conditionally disables question", () => {
+  describe("record answer with multiple conditional dependencies", () => {
     beforeEach(() => {
       survey
         .question({ tag: "q1" })
@@ -21,17 +21,21 @@ describe("Survey", () => {
         });
     });
 
-    it("with  multiple dependent questions", () => {
+    it("when conditions pass, questions stay active", () => {
       survey.recordAnswer("q1", 100);
       survey.recordAnswer("q2", ["blue", "red"]);
 
-      const enabledQuestions = survey.traverse((q) => q.enabled);
+      let enabledQuestions = survey.traverse((q) => q.enabled);
       expect(enabledQuestions.length).toBe(3);
+      expect(enabledQuestions.map((q) => q.tag)).toEqual(["q1", "q2", "q3"]);
+    });
 
+    it("when prior condition fails, all dependent conditions fail ", () => {
       survey.recordAnswer("q1", 99);
-      expect(survey.traverse((q) => q.enabled).map((q) => q.tag)).not.toContain(
-        "q2"
-      );
+      survey.recordAnswer("q2", ["blue", "red"]);
+
+      const enabledQuestions = survey.traverse((q) => q.enabled);
+      expect(enabledQuestions.map((q) => q.tag)).toEqual(["q1"]);
     });
   });
   describe("question()", () => {

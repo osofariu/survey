@@ -5,7 +5,7 @@ import { Condition } from "./condition";
 
 const evalWithSurvey = (expression: string, surveyArg?: Survey): boolean => {
   const survey = surveyArg || new Survey();
-  return new Condition(survey).evaluate(expression);
+  return new Condition(survey).evaluate(expression).enabled;
 };
 
 const surveyWithQuestionTags = (...tags: string[]) => {
@@ -197,6 +197,7 @@ describe("Conditional Expression", () => {
 
         expect(
           new Condition(survey).evaluate("(includes (arrayAnswer q) 'apples')")
+            .enabled
         ).toBe(false);
       });
       it("includes with literal array", () => {

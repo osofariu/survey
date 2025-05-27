@@ -31,9 +31,15 @@ export class Survey {
       .slice(position + 1)
       .forEach((subsequentQuestion: QuestionState) => {
         if (subsequentQuestion.condition) {
-          subsequentQuestion.enabled = new Condition(this).evaluate(
+          const evaluationResult = new Condition(this).evaluate(
             subsequentQuestion.condition
           );
+          const dependentQuestionsEnabled =
+            evaluationResult.dependentQuestions.every((questionTag) =>
+              this.isEnabledQuestion(questionTag)
+            );
+          subsequentQuestion.enabled =
+            evaluationResult.enabled && dependentQuestionsEnabled;
         }
       });
   }
@@ -47,5 +53,10 @@ export class Survey {
     }
     log.debug(`lookupAnswer for ${questionTag}: ${lookup.answer}`);
     return lookup.answer;
+  }
+
+  isEnabledQuestion(questionTag: string): boolean {
+    const question = this.traverse((q) => q.tag === questionTag)[0]; // array should not be empty
+    return question && question.enabled;
   }
 }

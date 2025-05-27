@@ -14,15 +14,25 @@ type NumericResult = number;
 type StringArrayResult = string[];
 type NumericArrayResult = number[];
 
+export interface ConditionResponse {
+  enabled: boolean;
+  dependentQuestions: string[];
+}
+
 class ConditionVisitor extends BaseConditionVisitor {
   private survey: Survey;
+  private dependentQuestionTags: string[];
 
   constructor(survey: Survey) {
     super();
     this.survey = survey;
     this.validateVisitor();
+    this.dependentQuestionTags = [];
   }
 
+  public dependsOn(): string[] {
+    return this.dependentQuestionTags;
+  }
   // Top level expression rule
   expressionRule(ctx: any): BooleanResult {
     log.info(`expressionRule; ctx: ${JSON.stringify(ctx)}\n`);
@@ -161,6 +171,7 @@ class ConditionVisitor extends BaseConditionVisitor {
         `Expected array answer looking up answer for tag ${tag}, got ${typeof answer}`
       );
     }
+    this.dependentQuestionTags.push(tag);
     return answer;
   }
 
@@ -205,7 +216,7 @@ export class Condition {
     this.survey = survey;
   }
 
-  public evaluate(expression: string): boolean {
+  public evaluate(expression: string): ConditionResponse {
     const lexResult = lex(expression);
     parserInstance.input = lexResult.tokens;
     const cst = parserInstance.expressionRule();
@@ -217,6 +228,10 @@ export class Condition {
     }
 
     const visitorInstance = new ConditionVisitor(this.survey);
-    return visitorInstance.visit(cst);
+    const enabled = visitorInstance.visit(cst);
+    return {
+      enabled,
+      dependentQuestions: visitorInstance.dependsOn(),
+    };
   }
 }

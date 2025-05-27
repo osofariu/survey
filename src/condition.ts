@@ -101,6 +101,7 @@ class ConditionVisitor extends BaseConditionVisitor {
     log.info(`includesRule; ctx: ${JSON.stringify(ctx)}\n`);
     const left = this.visit(ctx.left);
     const right = this.visit(ctx.right);
+    if (left === undefined) return false;
     if (!Array.isArray(left)) {
       throw new Error(
         `Left side of includes must be an array, got: ${typeof left}`
@@ -155,7 +156,7 @@ class ConditionVisitor extends BaseConditionVisitor {
     log.info(`arrayAnswerRule; ctx: ${JSON.stringify(ctx)}\n`);
     const tag = this.visit(ctx.IdentifierRule);
     const answer = this.survey.lookupAnswer(tag);
-    if (!Array.isArray(answer)) {
+    if (answer !== undefined && !Array.isArray(answer)) {
       throw new Error(
         `Expected array answer looking up answer for tag ${tag}, got ${typeof answer}`
       );

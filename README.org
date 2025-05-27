@@ -1,24 +1,23 @@
 * Survey 
 
-** Brief Description
-
-- A Survey is made up of Questions. The Survey tracks answers recorded for its questions, and determines which questions are active based on the optional condition associated with question.
-
-- Each Question has:
-    - a unique /tag/ to idendify that Question
-    - an optional /condition/ that at runtime can be used to determine if
-    the question is active or not.
+- A Survey is made up of ordered Questions. The Survey tracks answers recorded for its questions, and determines which questions are active based on the optional condition associated with question.
 
 - The /condition/ is a string, matching a lisp-style expression. It supports the following operations:
-    - (and boolean-exp-1 boolean-exp-2)
-    - (or boolean-exp-1 boolean-exp-2)
-    - (= string-exp-1 string-exp-2)
-    - (includes array-exp string-exp)
-    - (answer Identifier)
+    
+    - logical rules :: work on boolean expressions
+        - and
+        - or
+        - not
+    - comparison rules :: work with strings and numbers
+        - equal (=)
+        - less than (<)
+        - greater than (>)
+        - includes (array includes value)
+    - answer :: look up answer; works with stings and numbers or arrays of them
 
 - When the Survey records an answer for a Question it updates the state for the questions that follow it:
-    - if a question changes its state from what was previously recorded, the Survey re-evaluates the following questions to see if their state needs to change
-    - essentially this means they Survey keeps recursing over the remaining questions as needed to keep the state of each question consistent with the optional condition.
+    - if a question changes its answer from what was previously recorded, the Survey re-evaluates all the following questions to see if their state needs to change
+    - if question A depends on question B should A be active if B is inactive (even if the condition holds?) TBD
 
 ** Conditions
 

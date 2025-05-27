@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { Survey } from "./survey";
 import { buildQuestion, Question } from "./question";
+import { executionAsyncId } from "async_hooks";
 
 describe("Survey", () => {
   let survey: Survey;
@@ -10,24 +11,35 @@ describe("Survey", () => {
   });
 
   describe("record answer conditionally disables question", () => {
-    it("with a simple lookup", () => {
-      const survey = new Survey()
-        .question(buildQuestion("q1"))
-        .question(buildQuestion("q2", "(= (answer q1) 99)"));
+    beforeEach(() => {
+      survey
+        .question({ tag: "q1" })
+        .question({ tag: "q2", condition: "(> (answer q1) 99)" })
+        .question({
+          tag: "q3",
+          condition: "(includes (arrayAnswer q2) 'red')",
+        });
+    });
 
+    it("with  multiple dependent questions", () => {
       survey.recordAnswer("q1", 100);
-      expect(survey.questions[1].enabled).toBe(false);
+      survey.recordAnswer("q2", ["blue", "red"]);
+
+      const enabledQuestions = survey.traverse((q) => q.enabled);
+      expect(enabledQuestions.length).toBe(3);
 
       survey.recordAnswer("q1", 99);
-      expect(survey.questions[1].enabled).toBe(true);
+      expect(survey.traverse((q) => q.enabled).map((q) => q.tag)).not.toContain(
+        "q2"
+      );
     });
   });
   describe("question()", () => {
     it("should add a question to the survey", () => {
       const question: Question = { tag: "q1" };
       survey.question(question);
-      expect(survey.questions).toHaveLength(1);
-      expect(survey.questions[0].tag).toBe("q1");
+      expect(survey.traverse()).toHaveLength(1);
+      expect(survey.traverse((q) => q.tag === "q1").length).toBe(1);
     });
 
     it("should add a question with condition to the survey", () => {
@@ -36,9 +48,11 @@ describe("Survey", () => {
         condition: "equals(answer('q1'), 'yes')",
       };
       survey.question(question);
-      expect(survey.questions).toHaveLength(1);
-      expect(survey.questions[0].tag).toBe("q2");
-      expect(survey.questions[0].condition).toBe("equals(answer('q1'), 'yes')");
+      expect(survey.traverse()).toHaveLength(1);
+      expect(survey.traverse((q) => q.tag === "q2")).toHaveLength(1);
+      expect(survey.traverse()[0].condition).toBe(
+        "equals(answer('q1'), 'yes')"
+      );
     });
 
     it("should return the survey instance for chaining", () => {
@@ -56,13 +70,13 @@ describe("Survey", () => {
 
     it("should record an answer for an existing question", () => {
       survey.recordAnswer("q1", "yes");
-      expect(survey.questions[0].answer).toBe("yes");
+      expect(survey.traverse()[0].answer).toBe("yes");
     });
 
     it("should not modify questions when recording answer for non-existent question", () => {
       survey.recordAnswer("q3", "no");
-      expect(survey.questions[0].answer).toBeUndefined();
-      expect(survey.questions[1].answer).toBeUndefined();
+      expect(survey.traverse()[0].answer).toBeUndefined();
+      expect(survey.traverse()[1].answer).toBeUndefined();
     });
   });
 
@@ -91,6 +105,48 @@ describe("Survey", () => {
       expect(() => survey.lookupAnswer("q4")).toThrow(
         Error("Failed to find questions with tag: q4")
       );
+    });
+  });
+  describe("traverse with predicate", () => {
+    beforeEach(() => {
+      survey
+        .question({ tag: "q1" })
+        .question({ tag: "q2", condition: "(< (answer q1) 99)" })
+        .question({ tag: "q3" });
+
+      survey.recordAnswer("q1", 99);
+      survey.recordAnswer("q3", "yes");
+    });
+
+    it("should filter questions by tag", () => {
+      const result = survey.traverse((q) => q.tag === "q1");
+      expect(result).toHaveLength(1);
+      expect(result[0].tag).toBe("q1");
+    });
+
+    it("should filter questions by enabled state", () => {
+      const result = survey.traverse((q) => q.enabled);
+      expect(result).toHaveLength(2); // q1 and q3 are enabled, q2 is disabled
+      expect(result.map((q) => q.tag)).toEqual(["q1", "q3"]);
+    });
+
+    it("should filter questions by answer value", () => {
+      const result = survey.traverse((q) => q.answer === "yes");
+      expect(result).toHaveLength(1);
+      expect(result[0].tag).toBe("q3");
+    });
+
+    it("should return empty array when no questions match predicate", () => {
+      const result = survey.traverse((q) => q.tag === "nonexistent");
+      expect(result).toHaveLength(0);
+    });
+
+    it("should support complex predicates", () => {
+      const result = survey.traverse(
+        (q) => q.enabled && q.answer !== undefined && q.tag !== "q2"
+      );
+      expect(result).toHaveLength(2);
+      expect(result.map((q) => q.tag)).toEqual(["q1", "q3"]);
     });
   });
 });

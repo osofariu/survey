@@ -6,9 +6,11 @@ This library is intended to track the state of a survey that has complex depende
 
 In order to define the relationship between question we have introduced an /expression language/ that is just rich enough to give the user a flexible way to express relationships.  
 
-The main beenefits are:
-- rules are defined ahead of time, and provided to the /survey/.  This means that rules can be managed outside of code
-- the /expression language/ for the rules is flexible and can arbitrarily complex, as long as they comply with the grammar.
+** Key Features
+
+- Rules are defined ahead of time, and provided to the /survey/.  This means that rules can be managed outside of code
+
+- The /expression language/ for the rules is flexible and can arbitrarily complex, as long as they comply with the grammar.
 
 - The /expression language/ is applied as a /condition/ string associated with each question.  Here are the high-level rules of the language:
     - logical rules (combine multiple expressions)
@@ -16,13 +18,13 @@ The main beenefits are:
         - or
         - not
     - comparison rules (works with strings and numbers)
-        - equal (=)
+        - equal (for numbers and strings)
         - less than (for numbers)
         - greater than (for numbers)
         - includes (a value appears in a list of values)
-        - isAnswered (a prior question has been answer)
+        - isAnswered (a prior /question/ has been answer)
     - answer 
-        - look up answer to a prior question as a number, string, or array of numbers or strings
+        - look up answer to a prior /question/ as a number, string, or array of numbers or strings
 
 - The /survey/ disables dependent questions according to the following rules:
     - if the condition associated with a question evaluates to false, then the question becomes disabled
@@ -30,7 +32,7 @@ The main beenefits are:
         - a question /depends/ on another question if it mentions the other question somewhere in its conditional expression
 
 
-** Overview of the Expression language
+** The Expression language
 
 Conditions can be nested indefinitely as long as they conform to the grammar for this conditonal expression.
 

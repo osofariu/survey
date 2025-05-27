@@ -1,32 +1,36 @@
 * Survey 
 
-- A Survey is made up of ordered questions; the survey tracks answers to questions
-- Each question has an optional condition expression that enable or disables that question. 
-- The condition expression allows questions to depend on the state of previous questions
-- The Survey tracks answers recorded for its questions, and determines which questions are active by evaluating the corresponding condition.
+** High-level introduction
 
-- The /condition/ is a string, matching a lisp-style expression. It supports the following operations:
-    
-    - logical rules (work on boolean expressions)
+This library is intended to track the state of a survey that has complex dependencies between its questions.  The main purpose is to enable or disable dependent questions as the user provides answers to questions.
+
+In order to define the relationship between question we have introduced an /expression language/ that is just rich enough to give the user a flexible way to express relationships.  
+
+The main beenefits are:
+- rules are defined ahead of time, and provided to the /survey/.  This means that rules can be managed outside of code
+- the /expression language/ for the rules is flexible and can arbitrarily complex, as long as they comply with the grammar.
+
+- The /expression language/ is applied as a /condition/ string associated with each question.  Here are the high-level rules of the language:
+    - logical rules (combine multiple expressions)
         - and
         - or
         - not
-    - comparison rules (work with strings and numbers)
+    - comparison rules (works with strings and numbers)
         - equal (=)
-        - less than (<)
-        - greater than (>)
-        - includes (array includes value)
-        - isAnswered (a prior question has an answer)
+        - less than (for numbers)
+        - greater than (for numbers)
+        - includes (a value appears in a list of values)
+        - isAnswered (a prior question has been answer)
     - answer 
-        - look up answer to a prior question as a number of string
-        - look up answer to a prior question as an array of numbers of strings
+        - look up answer to a prior question as a number, string, or array of numbers or strings
 
 - The /survey/ disables dependent questions according to the following rules:
     - if the condition associated with a question evaluates to false, then the question becomes disabled
     - if a question becomes disabled then all the subsequent questions that *depend* on it also become disabled
         - a question /depends/ on another question if it mentions the other question somewhere in its conditional expression
 
-** Conditions
+
+** Overview of the Expression language
 
 Conditions can be nested indefinitely as long as they conform to the grammar for this conditonal expression.
 

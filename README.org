@@ -34,106 +34,27 @@ In order to define the relationship between question we have introduced an /expr
 
 ** The Expression language
 
-Conditions can be nested indefinitely as long as they conform to the grammar for this conditonal expression.
+Conditions can be nested indefinitely as long as they conform to the grammar for this conditonal expression. The [[https://osofariu.github.io/random/syntax_diagrams.html][Syntax Diagram]] rules show the grammar in a more visual way.
 
-*** equals, greater, less -- compares two string expressions
-
-This is not very interesting when all arguments are literal values, but this is valid grammar
+Below is an example of how to use the expression language.  It shows how dependent questions are disabled when their conditions are not met.
 
 #+BEGIN_SRC js
-    new Condition(new Survey()).evaluate("(= 'a' 'b')") == false
-    new Condition(new Survey()).evaluate("(= 'a' 'a')" ) == true
+    const survey = new Survey();
+    survey
+      .question({ tag: "q1" })
+      .question({ tag: "q2", condition: "(> (answer q1) 99)" })
+      .question({ tag: "q3", condition: "(includes (arrayAnswer q2) 'red')",})
+      .question({ tag: "q4", condition: "(isAnswered q1)" })
+      .question({ tag: "q5", condition: "(isAnswered q2)" });
+
+    survey.recordAnswer("q1", 99);
+    survey.recordAnswer("q2", ["blue", "red"]);
+
+    const enabledQuestions = survey.traverse((q) => q.enabled);
+    expect(enabledQuestions.map((q) => q.tag)).toEqual(["q1", "q4"]);
 #+END_SRC
 
-**** with numeric comparisons
-
-#+BEGIN_SRC js
-    new Condition(new Survey()).evaluate("(> 100 99)") == true
-    new Condition(new Survey()).evaluate("(<  99 100)" ) == true
-#+END_SRC
-
-*** not -- negates an expression that it wraps
-
-#+BEGIN_SRC js
-    const exp = "(not (= 'a' 'b'))"
-    new Condition(new Survey()).evaluate(exp) == true
-#+END_SRC
-
-*** isAnswered
-    it checks if the question referenced has been answered
-
-#+BEGIN_SRC js
-    const survey = new Survey().question(buildQuestion({tag: "q1"}));
-    new Condition(survey).evaluate("(isAnswered q1)") == false
-    survey.recordAnswer('q1' 'hello')
-    new Condition(survey).evaluate("(isAnswered q1)") == true
-#+END_SRC
-
-*** answer
-    it looks up an answer in the /survey/ and return the value
-
-#+BEGIN_SRC js
-    const survey = new Survey().question(buildQuestion({tag: "q1"}));
-    survey.recordAnswer('q1' 'hello')
-    
-    new Condition(survey).evaluate("(= (answer q1) 'hello')") == true
-    new Condition(survey).evaluate("(= (answer q1) 'hellowse')") == false
-#+END_SRC
-
-**** This works with numbers too
-
-#+BEGIN_SRC js
-    const q1: Question = {tag: "q1"}
-    const q2: Question = {tag: "q2", condition: "(> (answer q1) 100)"}
-    const survey = new Survey().question(q1).question(q2);
-
-    survey.questions[1].enabled == true
-    survey.recordAnswer('q1' 100)
-    survey.questions[1].enabled == false 
-#+END_SRC
-
-*** includes - similar to equal, but it looks up a string in a list of strings
-
-To help out parsing the gammar I used a different lookup keyword: arrayAnswer instead of answer.  A bit less elegant, but not terrible.
-
-#+BEGIN_SRC js
-    // simple example:
-    const exp1 = "(includes ['a', 'b'] 'b')"
-    new Condition(new Survey()).evaluate(exp1) == true
-
-    // with answer:
-    const question: Question = {
-      tag: "q1",
-    };
-    const survey = new Survey().question(question);
-    survey.recordAnswer('q1', ['a', 'b'])
-
-    const exp2 = "(includes (arrayAnswer q1) 'c')"
-    new Condition(survey).evaluate(exp2) == false
-#+END_SRC
-
-*** and
-    - expects two expressions
-    - evaluates them left to right
-    - stops the valuation if it detects false and returns false
-    - this example pulls in multiple expressions to make it more interesting
-#+BEGIN_SRC js
-    const question1: Question = {
-      tag: "q1",
-      conditionExp: exp,
-    };
-    const question2: Question = {
-      tag: "q2",
-      conditionExp: exp,
-    };
-    const survey = new Survey().question(question1).question(question2);
-    survey.recordAnswer('q1', 'hello')
-    survey.recordAnswer('q2', 'there') 
-    const exp = "(not (and (= (answer q1) "hello") (= 'there' (answer q2))))" 
-    new Condition(survey).evaluate(exp) == false
-#+END_SRC
-
-*** or
-    - expects two expressions
-    - evaluates them left to right
-    - stops the valuation if it detects true and returns true
+As you can see:
+- /q2/ became disabled after /q1/ was answered (condition for /q2/ was not met)
+- /q3/ became disabled because it depends on /q2/ and /q2/ was disabled 
+- /q5/ also became disabled because it depends on /q2/ (which is disabled)

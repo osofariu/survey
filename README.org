@@ -54,4 +54,7 @@ Below is an example of how to use the expression language.  It shows how depende
     expect(enabledQuestions.map((q) => q.tag)).toEqual(["q1", "q4"]);
 #+END_SRC
 
-As you can see, /q2/ became disabled after it was answered, and /q3/ became disabled because /q2/ was disabled.  Question /q5/ became disabled because it depends on /q2/ and /q2/ was disabled.
+As you can see:
+- /q2/ became disabled after /q1/ was answered (condition for /q2/ was not met)
+- /q3/ became disabled because it depends on /q2/ and /q2/ was disabled 
+- /q5/ also became disabled because it depends on /q2/ (which is disabled)

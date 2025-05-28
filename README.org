@@ -34,7 +34,8 @@ In order to define the relationship between question we have introduced an /expr
 
 ** The Expression language
 
-Conditions can be nested indefinitely as long as they conform to the grammar for this conditonal expression.
+Conditions can be nested indefinitely as long as they conform to the grammar for this conditonal expression. The [[https://osofariu.github.io/random/syntax_diagrams.html][Syntax Diagram]] rules show the grammar in a more visual way.
+
 
 *** equals, greater, less -- compares two string expressions
 
